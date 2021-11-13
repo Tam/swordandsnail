@@ -54,6 +54,7 @@ const postgraphileOptions = dbPool => ({
 	appendPlugins: [
 		require('@graphile-contrib/pg-simplify-inflector'),
 		require('postgraphile-plugin-connection-filter'),
+		require('../plugins/auth'),
 		require('../plugins/primary-key-mutations-only'),
 		require('../plugins/throw-warnings'),
 		require('../plugins/tidy-schema'),
@@ -91,15 +92,31 @@ const postgraphileOptions = dbPool => ({
 		return err;
 	}),
 
+	additionalGraphQLContextFromRequest: req => ({
+		setSession: (key, value) => req.session[key] = value,
+		getSession: key => req.session[key],
+		delSession: () => req.session.destroy(),
+	}),
+
 	async pgSettings (req) {
-		const NOAUTH_RESPONSE = {
+		const user_id = req?.session?.user_id ?? null;
+
+		if (user_id) {
+			const isAdmin = false
+				, role = 'player';
+
+			return {
+				role,
+				'session.user_id': user_id,
+				'session.admin': isAdmin.toString(),
+			};
+		}
+
+		return {
 			role: 'anonymous',
+			'session.user_id': 'null',
 			'session.admin': 'false',
 		};
-
-		// TODO: validate auth from session
-
-		return NOAUTH_RESPONSE;
 	},
 });
 

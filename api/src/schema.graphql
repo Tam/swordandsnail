@@ -166,6 +166,8 @@ input IntFilter {
 The root mutation type which contains root level fields which mutate data.
 """
 type Mutation {
+  authenticate(email: String!, password: String!): Boolean
+  logout: Boolean
   register(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.

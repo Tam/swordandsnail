@@ -26,11 +26,11 @@ $$ language sql stable;
 -- =============================================================================
 
 create or replace function util.current_user_id () returns uuid as $$
-  select uuid_nil() -- TODO: get current user ID from somewhere
+  select current_setting('session.user_id', true)::uuid
 $$ language sql security definer;
 
 create or replace function util.is_admin () returns boolean as $$
-  select false -- TODO: this
+  select exists(select from public.account where user_id = util.current_user_id() and role = 'admin')
   or (select case when 'on' then true else false end from current_setting('is_superuser'))
 $$ language sql security definer;
 
@@ -97,8 +97,9 @@ do $$ begin
   -- General Permissions
   -- ---------------------------------------------------------------------------
 
-  grant usage on schema public to anonymous, designer;
-  grant usage on schema private to admin;
+  grant usage on schema public to anonymous, player;
+  grant usage on schema util to anonymous, player;
+  grant usage on schema private to anonymous, admin;
 
   grant execute on function public.uuid_generate_v1mc() to anonymous, designer;
 
@@ -212,6 +213,8 @@ create or replace function public.viewer () returns public.user as $$
   select * from public.user where id = util.current_user_id()
 $$ language sql stable;
 
+grant execute on function public.viewer () to player;
+
 -- Register
 
 create or replace function public.register (
@@ -245,6 +248,20 @@ begin
   return true;
 end;
 $$ language plpgsql volatile security definer;
+
+grant execute on function public.register (varchar, varchar, varchar) to anonymous;
+
+-- Authenticate
+
+drop function if exists private.authenticate(varchar, varchar);
+create or replace function private.authenticate (
+  email    varchar(256),
+  password varchar(72)
+) returns uuid as $$
+  select user_id from public.account a
+  where a.email = $1
+    and a.password_hash = crypt($2, a.password_hash)
+$$ language sql stable security definer;
 
 -- Triggers
 -- =============================================================================
