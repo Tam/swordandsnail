@@ -28,7 +28,7 @@ app.use(session({
 		maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 		secure: process.env.NODE_ENV !== 'dev',
 		httpOnly: true,
-		sameSite: 'strict',
+		sameSite: 'none',
 	},
 }));
 app.use(postgraphile(dbPool, publicSchemas, postgraphileOptions(dbPool)));

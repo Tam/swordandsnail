@@ -79,7 +79,7 @@ export default function useCreateClient ({
 		if (unprotectedRoutes.indexOf(router.route) > -1) {
 			if (isLoggedIn) {
 				// redirectPostLogin(router, defaultPostLoginRedirect);
-				router.push('/');
+				router.push(defaultPostLoginRedirect);
 				preventRenderDuringRedirect = true;
 			}
 			return;

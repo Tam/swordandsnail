@@ -15,18 +15,21 @@ module.exports = makeExtendSchemaPlugin(() => ({
 		Mutation: {
 			async authenticate (_query, args, { pgClient, setSession }) {
 				try {
+					await pgClient.query('set role server');
 					const { rows: [success] } = await pgClient.query(
-						'select private.authenticate($1, $2)',
+						'select private.authenticate($1, $2);',
 						[args.email, args.password]
 					);
+					await pgClient.query('reset role');
 
-					if (!success)
+					if (!success?.authenticate)
 						return false;
 
 					await setSession('user_id', success.authenticate);
 
 					return true;
 				} catch (e) {
+					console.log(e);
 					return false;
 				}
 			},

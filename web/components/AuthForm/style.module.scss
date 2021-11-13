@@ -1,0 +1,27 @@
+@import "../../styles/variables";
+
+.form {
+	width: 100%;
+	max-width: size(400);
+	padding: size($spacer);
+
+	h1 {
+		margin-bottom: size(48);
+		padding-bottom: size(24);
+
+		font-size: size(32);
+
+		border-bottom: 2px solid $text-color;
+	}
+
+	h2 {
+		margin-bottom: size(24);
+		font-size: size(24);
+	}
+
+	footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+}

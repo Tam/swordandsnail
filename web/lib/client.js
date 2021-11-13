@@ -1,6 +1,6 @@
 import { authExchange } from '@urql/exchange-auth';
 import { retryExchange } from '@urql/exchange-retry';
-import { cacheExchange, dedupExchange, createClient as _createClient } from 'urql';
+import { cacheExchange, dedupExchange, fetchExchange, createClient as _createClient } from 'urql';
 
 export const URI = process.env.NEXT_PUBLIC_API || 'https://dev.api.swordandsnail.com/graphql';
 export const SessionData = {
@@ -32,6 +32,7 @@ export const clientOpts = {
 			},
 		}),
 		retryExchange({}),
+		fetchExchange,
 	].filter(Boolean),
 	fetchOptions: {
 		credentials: 'include',

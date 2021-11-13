@@ -38,3 +38,11 @@ body {
 ::selection {
 	background-color: change-color($text-color, $alpha: 0.25);
 }
+
+a {
+	color: $text-color;
+
+	&:hover {
+		text-decoration-thickness: size(2);
+	}
+}

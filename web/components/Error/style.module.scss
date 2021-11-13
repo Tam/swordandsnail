@@ -1,0 +1,17 @@
+@import "../../styles/variables";
+
+.error {
+	margin: size(48) 0;
+
+	p {
+		font-style: italic;
+		line-height: 1.5em;
+	}
+
+	small {
+		display: block;
+		margin-bottom: size(3);
+
+		font-weight: bold;
+	}
+}

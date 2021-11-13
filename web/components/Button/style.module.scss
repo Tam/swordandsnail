@@ -1,0 +1,15 @@
+@import "../../styles/variables";
+
+.button {
+	display: inline-block;
+	padding: size(10) size(24);
+
+	color: $background-color;
+	font-size: size(18);
+
+	appearance: none;
+	background: $text-color;
+	border: none;
+	border-radius: 0;
+	cursor: pointer;
+}

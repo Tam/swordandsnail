@@ -74,12 +74,14 @@ do $$ begin
     drop owned by player cascade;
     drop owned by designer cascade;
     drop owned by admin cascade;
+    drop owned by server cascade;
   end if;
 
   drop role if exists anonymous;
   drop role if exists player;
   drop role if exists designer;
   drop role if exists admin;
+  drop role if exists server;
 
   revoke all on all functions in schema public from public cascade;
   revoke all on schema public from public cascade;
@@ -94,19 +96,21 @@ do $$ begin
   create role player;
   create role designer;
   create role admin;
+  create role server;
 
   grant player to designer;
   grant designer to admin;
+  grant admin to server;
 
   -- General Permissions
   -- ---------------------------------------------------------------------------
 
   grant usage on schema public to anonymous, player;
   grant usage on schema util to anonymous, player;
-  grant usage on schema private to anonymous, admin;
+  grant usage on schema private to admin;
 
-  grant execute on function public.uuid_generate_v1mc() to anonymous, designer;
-  grant execute on function public.uuid_nil() to anonymous, designer;
+  grant execute on function public.uuid_generate_v1mc() to anonymous, player;
+  grant execute on function public.uuid_nil() to anonymous, player;
 
 end $$;
 
@@ -272,7 +276,6 @@ grant execute on function public.register (varchar, varchar, varchar) to anonymo
 
 -- Authenticate
 
-drop function if exists private.authenticate(varchar, varchar);
 create or replace function private.authenticate (
   email    varchar(256),
   password varchar(72)
@@ -281,6 +284,8 @@ create or replace function private.authenticate (
   where a.email = $1
     and a.password_hash = crypt($2, a.password_hash)
 $$ language sql stable security definer;
+
+grant execute on function private.authenticate(varchar, varchar) to server;
 
 -- Triggers
 -- =============================================================================
