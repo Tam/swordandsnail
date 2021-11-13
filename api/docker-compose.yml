@@ -40,8 +40,7 @@ services:
       dockerfile: ./.docker/node
     volumes:
       - ./src:/home/node/app:delegated
-      - ./src/schema.app.graphql:/home/app/node/schema.app.graphql:delegated
-      - ./src/schema.admin.graphql:/home/app/node/schema.admin.graphql:delegated
+      - ./src/schema.graphql:/home/app/node/schema.graphql:delegated
       - /home/node/app/node_modules
     depends_on:
       - db

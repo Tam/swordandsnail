@@ -22,11 +22,15 @@ create or replace function type_missing (typename varchar) returns boolean as $$
   select not exists (select true from pg_type where typname = typename)
 $$ language sql stable;
 
+create or replace function col_missing (tblname varchar, colname varchar) returns boolean as $$
+  select not exists (select true from information_schema.columns where table_name = tblname and column_name = colname)
+$$ language sql stable;
+
 -- Utilities
 -- =============================================================================
 
 create or replace function util.current_user_id () returns uuid as $$
-  select current_setting('session.user_id', true)::uuid
+  select coalesce(nullif(current_setting('session.user_id', true), 'null'), uuid_nil()::text)::uuid
 $$ language sql security definer;
 
 create or replace function util.is_admin () returns boolean as $$
@@ -102,6 +106,7 @@ do $$ begin
   grant usage on schema private to anonymous, admin;
 
   grant execute on function public.uuid_generate_v1mc() to anonymous, designer;
+  grant execute on function public.uuid_nil() to anonymous, designer;
 
 end $$;
 
@@ -173,6 +178,12 @@ create table if not exists public.preferences (
   theme private.theme not null default 'system'
 );
 
+do $$ begin
+  if col_missing ('preferences', 'font') then
+    alter table public.preferences add column font varchar not null default 'quattro';
+  end if;
+end; $$;
+
 comment on table public.preferences is E'@omit all,create,delete';
 
 alter table public.preferences enable row level security;
@@ -206,6 +217,14 @@ create index if not exists idx_session_expire on private.session(expire);
 
 -- Account / Auth
 -- -----------------------------------------------------------------------------
+
+-- Is Authenticated
+
+create or replace function public.is_authenticated () returns boolean as $$
+  select util.current_user_id() != uuid_nil()
+$$ language sql stable;
+
+grant execute on function public.is_authenticated () to anonymous, player;
 
 -- Viewer
 

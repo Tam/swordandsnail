@@ -23,6 +23,7 @@ app.use(session({
 	secret: process.env.SESSION_COOKIE_SECRET,
 	resave: false,
 	saveUninitialized: false,
+	name: 'snails.satchel',
 	cookie: {
 		maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 		secure: process.env.NODE_ENV !== 'dev',

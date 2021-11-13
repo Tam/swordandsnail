@@ -1,0 +1,40 @@
+@import "variables";
+@import "reset";
+@import "fonts";
+
+* {
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
+	text-rendering: optimizeLegibility !important;
+	-webkit-font-smoothing: antialiased !important;
+	box-sizing: border-box;
+	font-family: inherit;
+}
+
+html {
+	height: 100%;
+	-ms-overflow-style: -ms-autohiding-scrollbar;
+	scroll-behavior: smooth;
+
+	@include responsiveSize(14, 16);
+	font-family: $font-family-quattro;
+	font-weight: normal;
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	height: 100%;
+
+	color: $text-color;
+	background: $background-color;
+}
+
+#__next {
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+::selection {
+	background-color: change-color($text-color, $alpha: 0.25);
+}

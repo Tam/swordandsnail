@@ -102,8 +102,13 @@ const postgraphileOptions = dbPool => ({
 		const user_id = req?.session?.user_id ?? null;
 
 		if (user_id) {
-			const isAdmin = false
-				, role = 'player';
+			const { rows: [account] } = await dbPool.query(
+				'select role from public.account where user_id = $1',
+				[user_id]
+			);
+
+			const isAdmin = account.role === 'admin'
+				, role = account.role;
 
 			return {
 				role,

@@ -1,0 +1,213 @@
+@use "sass:math";
+
+// Colours
+// =========================================================================
+
+$text-color: #2C2825;
+
+$background-color: #F4F2EF;
+$border-color: #E0DBD4;
+
+// z-index
+// =========================================================================
+
+$z-loading: 101;
+$z-notifications: 100;
+$z-cookies: 80;
+$z-modal: 20;
+$z-notice: 15;
+$z-header: 10;
+$z-cardDrawer: 6;
+$z-map: 5;
+$z-mask: 3;
+$z-footer: 2;
+
+// Animation
+// =========================================================================
+
+//$ease-in-out-back: cubic-bezier(0.680, -0.550, 0.265, 1.550);
+$ease-in-out-back:  cubic-bezier(.51,2.71,.52,.56);
+$ease-sliding: cubic-bezier(0.385, 0.860, 0.360, 0.950);
+
+$drawer-speed: 0.5s;
+
+@keyframes spinCentre {
+	from { transform: translate3d(-50%, -50%, 0) rotate(0deg) }
+	to { transform: translate3d(-50%, -50%, 0) rotate(360deg) }
+}
+
+@keyframes spin {
+	from { transform: rotate(0deg) }
+	to { transform: rotate(360deg) }
+}
+
+// Fonts
+// =========================================================================
+
+// Note: Fonts are defined in style/index.scss
+
+$font-family-system: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
+$font-family-quattro: 'Quattro', $font-family-system;
+$font-family-duo: 'Duo', $font-family-system;
+$font-family-duospace: 'Duospace', $font-family-system;
+$font-family-mono: 'Mono', $font-family-system;
+
+// Functions
+// =========================================================================
+
+/**
+ * Round the given number to a set number of decimals
+ * @see https://stackoverflow.com/a/29901280/550109
+ */
+@function decimal-round ($number, $digits: 0, $mode: round) {
+	$n: 1;
+
+	// $number must be a number
+	@if type-of($number) != number {
+		@warn '#{ $number } is not a number.';
+		@return $number;
+	}
+
+	// $digits must be a unitless number
+	@if type-of($digits) != number {
+		@warn '#{ $digits } is not a number.';
+		@return $number;
+	} @else if not unitless($digits) {
+		@warn '#{ $digits } has a unit.';
+		@return $number;
+	}
+
+	@for $i from 1 through $digits {
+		$n: $n * 10;
+	}
+
+	@if $mode == round {
+		@return math.div(round($number * $n), $n);
+	} @else if $mode == ceil {
+		@return math.div(ceil($number * $n), $n);
+	} @else if $mode == floor {
+		@return math.div(floor($number * $n), $n);
+	} @else {
+		@warn '#{ $mode } is undefined keyword.';
+		@return $number;
+	}
+}
+
+/// Remove the unit of a length
+/// @param {Number} $number - Number to remove unit from
+/// @return {Number} - Unitless number
+@function strip-unit($number) {
+	@if type-of($number) == 'number' and not unitless($number) {
+		@return math.div($number, $number * 0 + 1);
+	}
+
+	@return $number;
+}
+
+/**
+ * Convert the given PX size to REMs
+ */
+@function size ($targetSize, $baseSize: 16) {
+	@return #{decimal-round(math.div(strip-unit($targetSize), $baseSize), 3)}rem;
+}
+
+// Sizes
+// =========================================================================
+
+$header-height: #{size(72)};
+$spacer: 40px;
+
+// Media Queries (Misc)
+// =========================================================================
+
+$still: '(prefers-reduced-motion: reduce)';
+
+// Grid
+// =========================================================================
+
+$xs-min: 34em;
+$sm-min: 48em;
+$md-min: 75em;
+$lg-min: 75em;
+
+$ie: 'screen and (-ms-high-contrast: active), screen and (-ms-high-contrast: none)';
+
+$container-width: 1400px;
+$container-width-small: 970px;
+
+$container: '(min-width: #{$container-width + $spacer*2})';
+$container-up: '(min-width: #{$container-width + $spacer*2})';
+$container-down: '(max-width: #{$container-width + $spacer*2})';
+
+$xs-viewport: '(min-width: #{$xs-min})';
+$sm-viewport: '(min-width: #{$sm-min})';
+$md-viewport: '(min-width: #{$md-min})';
+$lg-viewport: '(min-width: #{$lg-min})';
+
+$xs-viewport-down: '(max-width: #{$xs-min})';
+$sm-viewport-down: '(max-width: #{$sm-min})';
+$md-viewport-down: '(max-width: #{$md-min})';
+$lg-viewport-down: '(max-width: #{$lg-min})';
+
+$col-1-12: 8.333%;
+$col-2-12: 16.666%;
+$col-3-12: 25%;
+$col-4-12: 33.333%;
+$col-5-12: 41.667%;
+$col-6-12: 50%;
+$col-7-12: 58.333%;
+$col-8-12: 66.667%;
+$col-9-12: 75%;
+$col-10-12: 83.333%;
+$col-11-12: 91.667%;
+$col-12-12: 100%;
+
+@mixin width($col-width, $space: $spacer) {
+	width: calc(#{$col-width} - #{$space});
+}
+
+// Mixins
+// =========================================================================
+
+/**
+ * $maxFontSize - The max font size (also the fallback)
+ */
+@mixin responsiveSize($minFontSize, $maxFontSize, $minScreenWidth: 400, $maxScreenWidth: 1260) {
+	$fontDiff: $maxFontSize - $minFontSize;
+	$screenDiff: $maxScreenWidth - $minScreenWidth;
+	font-size: #{$maxFontSize}px;
+	font-size: calc(#{$minFontSize}px + (#{$fontDiff}) * (100vw - #{$minScreenWidth}px) / (#{$screenDiff}));
+
+	@media (min-width: #{$maxScreenWidth}px) {
+		font-size: #{$maxFontSize}px;
+	}
+
+	@media (max-width: #{$minScreenWidth}px) {
+		font-size: #{$minFontSize}px;
+	}
+}
+
+// Classes
+// =========================================================================
+
+.container {
+	width: 100%;
+	max-width: $container-width;
+	margin: auto;
+}
+
+.grid {
+	@extend .container;
+	display: grid;
+	grid-template-columns: repeat(12, 1fr);
+	grid-gap: $spacer;
+
+	@media #{$ie} {
+		display: -ms-grid;
+		-ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+	}
+
+	@media #{$xs-viewport-down} {
+		grid-column-gap: 0;
+	}
+}
