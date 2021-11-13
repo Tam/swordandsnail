@@ -2,7 +2,7 @@ import Input from '../components/Input';
 import AuthForm from '../components/AuthForm';
 import Button from '../components/Button';
 import A from '../components/A';
-import Error from '../components/Error';
+import Notice from '../components/Error';
 import { gql, useMutation } from 'urql';
 import { SessionData } from '../lib/client';
 import { useRouter } from 'next/router';
@@ -37,7 +37,7 @@ export default function Home () {
 	return (
 		<AuthForm title="Sign in" onSubmit={onSubmit}>
 			{data?.authenticate === false && (
-				<Error>Invalid email or password!</Error>
+				<Notice label="Error">Invalid email or password!</Notice>
 			)}
 
 			<Input

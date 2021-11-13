@@ -1,9 +1,9 @@
 import css from './style.module.scss';
 
-export default function Error ({ children }) {
+export default function Notice ({ label = 'Notice', children }) {
 	return (
-		<div className={css.error} role="alert" aria-atomic="true">
-			<small>Error</small>
+		<div className={css.notice} role="alert" aria-atomic="true">
+			<small>{label}</small>
 			<p>{children}</p>
 		</div>
 	);
