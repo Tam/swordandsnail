@@ -1,0 +1,18 @@
+version: '3.7'
+services:
+
+  db:
+    ports:
+      - 5432:5432
+
+  graph:
+    ports:
+      - 9229:9229
+
+  worker:
+    ports:
+      - 9228:9228
+
+  adminer:
+    image: adminer
+    restart: unless-stopped

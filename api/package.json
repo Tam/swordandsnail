@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@graphile-contrib/pg-simplify-inflector": "^6.1.0",
+    "connect-pg-simple": "^7.0.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "graphile-utils": "^4.12.2",
+    "graphile-worker": "^0.12.0",
+    "graphql": "^16.0.1",
+    "pg": "^8.7.1",
+    "postgraphile": "^4.12.5",
+    "postgraphile-plugin-connection-filter": "^2.2.2"
+  }
+}

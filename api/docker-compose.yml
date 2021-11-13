@@ -1,0 +1,70 @@
+version: '3.7'
+services:
+
+  web:
+    image: nginx:alpine
+    volumes:
+      - ./web:/www:delegated
+      - ./.docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./.data/logs/nginx:/var/log/nginx:delegated
+    depends_on:
+      - graph
+    env_file: .env
+    networks:
+      - default
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.$COMPOSE_PROJECT_NAME.rule=Host(`$VIRTUAL_HOST`)
+      - traefik.http.routers.$COMPOSE_PROJECT_NAME.tls=true
+      - traefik.http.routers.$COMPOSE_PROJECT_NAME.tls.certresolver=main
+    restart: unless-stopped
+
+  db:
+    build:
+      context: .
+      dockerfile: ./.docker/postgres
+    command: postgres -c config_file=/etc/postgresql.conf
+    volumes:
+      - ./.docker/postgresql.conf:/etc/postgresql.conf:delegated
+      - ./.data/db:/var/lib/postgresql/data:delegated
+    environment:
+      - POSTGRES_DB=${PGDATABASE}
+      - POSTGRES_USER=${PGUSER}
+      - POSTGRES_PASSWORD=${PGPASSWORD}
+    restart: unless-stopped
+
+  graph:
+    build:
+      context: .
+      dockerfile: ./.docker/node
+    volumes:
+      - ./src:/home/node/app:delegated
+      - ./src/schema.app.graphql:/home/app/node/schema.app.graphql:delegated
+      - ./src/schema.admin.graphql:/home/app/node/schema.admin.graphql:delegated
+      - /home/node/app/node_modules
+    depends_on:
+      - db
+    env_file: .env
+    command: ["pm2-runtime", "ecosystem.config.js", "--only", "api"]
+    working_dir: /home/node/app
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: ./.docker/node
+    volumes:
+      - ./src:/home/node/app:delegated
+      - ./src/tasks:/home/node/app/tasks:delegated
+      - /home/node/app/node_modules
+    depends_on:
+      - db
+    env_file: .env
+    command: ["pm2-runtime", "ecosystem.config.js", "--only", "worker"]
+    working_dir: /home/node/app
+    restart: unless-stopped
+
+networks:
+  proxy:
+    external: true

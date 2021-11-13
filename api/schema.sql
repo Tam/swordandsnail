@@ -1,0 +1,340 @@
+-- noinspection SqlNoDataSourceInspectionForFile
+
+set client_min_messages to warning;
+
+-- Extensions
+-- =============================================================================
+
+create extension if not exists "pgcrypto";
+create extension if not exists "uuid-ossp";
+
+-- Schemas
+-- =============================================================================
+
+create schema if not exists public;
+create schema if not exists private;
+create schema if not exists util;
+
+-- Helpers
+-- =============================================================================
+
+create or replace function type_missing (typename varchar) returns boolean as $$
+  select not exists (select true from pg_type where typname = typename)
+$$ language sql stable;
+
+-- Utilities
+-- =============================================================================
+
+create or replace function util.current_user_id () returns uuid as $$
+  select uuid_nil() -- TODO: get current user ID from somewhere
+$$ language sql security definer;
+
+create or replace function util.is_admin () returns boolean as $$
+  select false -- TODO: this
+  or (select case when 'on' then true else false end from current_setting('is_superuser'))
+$$ language sql security definer;
+
+-- Types
+-- =============================================================================
+
+do $$ begin
+
+  if type_missing('role') then
+    create type private.role as enum (
+      'player',
+      'designer',
+      'admin'
+    );
+  end if;
+
+  if type_missing('theme') then
+    create type private.theme as enum (
+      'light',
+      'dark',
+      'system'
+    );
+  end if;
+
+end $$;
+
+-- RLS
+-- =============================================================================
+
+do $$ begin
+
+  -- Reset
+  -- ---------------------------------------------------------------------------
+
+  if exists(select from pg_catalog.pg_roles where rolname = 'anonymous') then
+    drop owned by anonymous cascade;
+    drop owned by player cascade;
+    drop owned by designer cascade;
+    drop owned by admin cascade;
+  end if;
+
+  drop role if exists anonymous;
+  drop role if exists player;
+  drop role if exists designer;
+  drop role if exists admin;
+
+  revoke all on all functions in schema public from public cascade;
+  revoke all on schema public from public cascade;
+
+  revoke all on all functions in schema private from public cascade;
+  revoke all on schema private from public cascade;
+
+  -- Create
+  -- ---------------------------------------------------------------------------
+
+  create role anonymous;
+  create role player;
+  create role designer;
+  create role admin;
+
+  grant player to designer;
+  grant designer to admin;
+
+  -- General Permissions
+  -- ---------------------------------------------------------------------------
+
+  grant usage on schema public to anonymous, designer;
+  grant usage on schema private to admin;
+
+  grant execute on function public.uuid_generate_v1mc() to anonymous, designer;
+
+end $$;
+
+-- Tables
+-- =============================================================================
+
+-- Account / Auth
+-- -----------------------------------------------------------------------------
+
+-- User
+
+create table if not exists public.user (
+  id         uuid primary key default public.uuid_generate_v1mc(),
+  name       varchar default null,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+comment on table public.user is E'@omit create,delete';
+comment on column public.user.created_at is E'@omit update';
+comment on column public.user.updated_at is E'@omit update';
+
+alter table public.user enable row level security;
+grant select,update on table public.user to player;
+
+drop policy if exists user_select on public.user;
+create policy user_select on public.user for select using (true);
+
+drop policy if exists user_update on public.user;
+create policy user_update on public.user for update using (
+  id = util.current_user_id()
+  or util.is_admin()
+);
+
+-- Account
+
+create table if not exists public.account (
+  user_id        uuid primary key references public.user (id) on delete cascade,
+  role           private.role not null default 'player',
+  email          varchar(256) unique check (email ~* '^.+@.+\..+$'),
+  password_hash  varchar(100) default null,
+  security_stamp varchar(100)
+);
+
+comment on table public.account is E'@omit all,create,delete';
+comment on column public.account.password_hash is E'@omit';
+comment on column public.account.security_stamp is E'@omit';
+
+alter table public.account enable row level security;
+grant select,update on table public.account to player;
+
+drop policy if exists account_select on public.account;
+create policy account_select on public.account for select using (
+  user_id = util.current_user_id()
+  or util.is_admin()
+);
+
+drop policy if exists account_update on public.account;
+create policy account_update on public.account for update using (
+  user_id = util.current_user_id()
+  or util.is_admin()
+);
+
+-- Preferences
+
+create table if not exists public.preferences (
+  user_id uuid primary key references public.user (id) on delete cascade,
+  text_column_width int not null default 80,
+  theme private.theme not null default 'system'
+);
+
+comment on table public.preferences is E'@omit all,create,delete';
+
+alter table public.preferences enable row level security;
+grant select,update on table public.preferences to player;
+
+drop policy if exists preferences_select on public.preferences;
+create policy preferences_select on public.preferences for select using (
+  user_id = util.current_user_id()
+  or util.is_admin()
+);
+
+drop policy if exists preferences_update on public.preferences;
+create policy preferences_update on public.preferences for update using (
+  user_id = util.current_user_id()
+  or util.is_admin()
+);
+
+-- Session
+
+create table if not exists private.session (
+  sid    varchar not null collate "default",
+  sess   json not null,
+  expire timestamp(6) not null,
+  primary key (sid) not deferrable initially immediate
+) with (oids = false);
+
+create index if not exists idx_session_expire on private.session(expire);
+
+-- Functions
+-- =============================================================================
+
+-- Account / Auth
+-- -----------------------------------------------------------------------------
+
+-- Viewer
+
+create or replace function public.viewer () returns public.user as $$
+  select * from public.user where id = util.current_user_id()
+$$ language sql stable;
+
+-- Register
+
+create or replace function public.register (
+  email varchar(256),
+  password varchar(72),
+  name varchar
+) returns boolean as $$
+declare
+  _id uuid;
+begin
+  -- Force email lowercase
+  email := lower(email);
+
+  -- Check if email already exists
+  if (select true from public.account a where a.email = lower($1)) then
+    raise exception 'email_taken';
+  end if;
+
+  -- Create user
+  insert into public.user (name)
+  values ($3)
+  returning id into _id;
+
+  -- Create account
+  insert into public.account (user_id, email, password_hash)
+  values (_id, $1, crypt(password, gen_salt('bf')));
+
+  -- Create preferences
+  insert into public.preferences (user_id) values (_id);
+
+  return true;
+end;
+$$ language plpgsql volatile security definer;
+
+-- Triggers
+-- =============================================================================
+
+-- Timestamps
+-- -----------------------------------------------------------------------------
+
+create or replace function private.set_timestamps () returns trigger as $$
+begin
+  if (TG_OP = 'INSERT') then
+    new.created_at = now();
+  end if;
+
+  if (row(new.*) is distinct from row(old.*)) then
+    new.updated_at = now();
+    return new;
+  end if;
+
+  return old;
+end;
+$$ language plpgsql volatile security definer;
+
+drop trigger if exists set_timestamps on public.user;
+create trigger set_timestamps before insert or update on public.user
+  for each row execute procedure private.set_timestamps();
+
+-- Account / Auth
+-- -----------------------------------------------------------------------------
+
+-- Validate Security Stamp
+
+create or replace function private.validate_security_stamp () returns trigger as $$
+declare
+  _stamp varchar(100);
+begin
+  _stamp := md5(new.email || new.password_hash);
+
+  if old.security_stamp is null or old.security_stamp != _stamp then
+    -- TODO: Purge all sessions except the one that triggered this change
+
+    new.security_stamp := _stamp;
+  end if;
+
+  return new;
+end;
+$$ language plpgsql volatile security definer;
+
+drop trigger if exists validate_security_stamp on public.account;
+create trigger validate_security_stamp
+  before insert or update on public.account
+  for each row execute procedure private.validate_security_stamp();
+
+-- Before Account Create
+
+create or replace function private.before_account_create () returns trigger as $$
+begin
+  -- Force email to lower-case
+  new.email = lower(new.email);
+
+  return new;
+end;
+$$ language plpgsql volatile security definer;
+
+drop trigger if exists before_account_create on public.account;
+create trigger before_account_create
+  before insert on public.account
+  for each row execute procedure private.before_account_create();
+
+-- Before Account Update
+
+create or replace function private.before_account_update () returns trigger as $$
+begin
+  -- Prevent non-admins from changing user roles
+  if not util.is_admin() then
+    new.role = old.role;
+  end if;
+
+  -- Force email to lower-case
+  new.email = lower(new.email);
+
+  return new;
+end;
+$$ language plpgsql volatile security definer;
+
+drop trigger if exists before_account_update on public.account;
+create trigger before_account_update
+  before update on public.account
+  for each row execute procedure private.before_account_update();
+
+-- Drop Helpers
+-- =============================================================================
+
+drop function if exists type_missing(varchar);
