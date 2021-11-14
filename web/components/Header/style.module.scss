@@ -1,0 +1,67 @@
+@import "../../styles/variables";
+
+.header {
+	position: relative;
+	z-index: $z-header;
+
+	display: flex;
+	align-items: stretch;
+	justify-content: space-between;
+	margin: 0 size($spacer * 0.5) size($spacer * 0.5);
+	padding: size($spacer * 0.5) 0 0;
+
+	border-bottom: size(2) solid $text-color;
+}
+
+.logo {
+	display: inline-block;
+	padding: size($spacer * 0.5);
+
+	font-size: size(20);
+}
+
+.menuWrap {
+	position: relative;
+
+	> button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		padding: size($spacer * 0.5);
+
+		appearance: none;
+		background: none;
+		border: none;
+		border-radius: 0;
+		cursor: pointer;
+	}
+}
+
+.menu {
+	position: absolute;
+	top: 100%;
+	right: 0;
+
+	white-space: nowrap;
+
+	background: $background-color;
+	border: size(2) solid $text-color;
+	border-top: none;
+
+	button,
+	a {
+		width: 100%;
+		text-align: center;
+	}
+
+	a {
+		display: inline-block;
+		padding: size($spacer*0.3) size($spacer*0.5);
+		font-size: size(18);
+	}
+
+	li:not(:first-child) a {
+		border-top: size(2) dotted $text-color;
+	}
+}

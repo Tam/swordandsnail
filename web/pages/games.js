@@ -1,25 +1,12 @@
-import { gql, useMutation } from 'urql';
-import Button from '../components/Button';
-import { SessionData } from '../lib/client';
-import { useRouter } from 'next/router';
+import Header from '../components/Header';
 
 export default function Games () {
-	const router = useRouter();
-	const [, logout] = useMutation(gql`
-		mutation Logout {
-			logout
-		}
-	`);
 
 	return (
-		<div>
-			hello
+		<>
+			<Header />
 
-			<Button onClick={async () => {
-				SessionData.isLoggedIn = false;
-				await logout();
-				await router.push('/');
-			}}>Sign out</Button>
-		</div>
+			hello
+		</>
 	);
 }

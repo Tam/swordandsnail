@@ -5,7 +5,6 @@ import { cacheExchange, dedupExchange, fetchExchange, createClient as _createCli
 export const URI = process.env.NEXT_PUBLIC_API || 'https://dev.api.swordandsnail.com/graphql';
 export const SessionData = {
 	isLoggedIn: false,
-	expires: null,
 };
 
 export const clientOpts = {
@@ -28,7 +27,7 @@ export const clientOpts = {
 			},
 
 			willAuthError () {
-				return (SessionData.expires && SessionData.expires <= Date.now()) || SessionData.isLoggedIn === false;
+				return SessionData.isLoggedIn === false;
 			},
 		}),
 		retryExchange({}),

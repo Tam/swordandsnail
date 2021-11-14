@@ -93,7 +93,7 @@ export default function useCreateClient ({
 			router.push('/');
 			preventRenderDuringRedirect = true;
 		}
-	}, [isChecking, isLoggedIn]);
+	}, [isChecking, isLoggedIn, router.pathname]);
 
 	return useMemo(() => {
 		return [createClient(), preventRenderDuringRedirect];

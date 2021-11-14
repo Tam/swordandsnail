@@ -22,7 +22,6 @@ const setCors = () => ({
 				'Origin',
 				'X-Requested-With',
 				'Accept',
-				'Authorization',
 				'Content-Type',
 				'Content-Length',
 				'X-PostGraphile-Explain',
@@ -32,7 +31,6 @@ const setCors = () => ({
 			'Access-Control-Expose-Headers',
 			[
 				'X-GraphQL-Event-Stream',
-				'X-Session-Expires',
 			].join(', '),
 		);
 

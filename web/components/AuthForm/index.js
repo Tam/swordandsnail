@@ -9,10 +9,12 @@ export default function AuthForm ({ onSubmit, title, children }) {
 	};
 
 	return (
-		<form className={css.form} onSubmit={_onSubmit}>
+		<div className={css.wrap}>
 			<Title>{title}</Title>
-			<h1>Sword & Snail</h1>
-			{children}
-		</form>
+			<form className={css.form} onSubmit={_onSubmit}>
+				<h1>Sword & Snail</h1>
+				{children}
+			</form>
+		</div>
 	);
 }

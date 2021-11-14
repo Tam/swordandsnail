@@ -10,7 +10,7 @@ import { useRouter } from 'next/router';
 export default function Home () {
 	const router = useRouter();
 
-	const [{ data }, login] = useMutation(gql`
+	const [{ data, fetching }, login] = useMutation(gql`
 		mutation Login (
 			$email: String!
 			$password: String!
@@ -55,7 +55,7 @@ export default function Home () {
 			/>
 
 			<footer>
-				<Button type="submit">Sign In</Button>
+				<Button type="submit" disabled={fetching}>Sign In</Button>
 				<A href="/forgot">Forgot Password</A>
 			</footer>
 		</AuthForm>
