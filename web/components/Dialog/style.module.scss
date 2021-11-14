@@ -1,0 +1,33 @@
+@import "../../styles/variables";
+
+.overlay {
+	position: fixed;
+	z-index: $z-modal;
+	top: 0;
+	left: 0;
+
+	display: flex;
+	width: 100vw;
+	height: 100vh;
+
+	padding: size($spacer * 0.5);
+
+	background-image:
+		radial-gradient($background-color 1px, transparent 1px),
+		radial-gradient($background-color 1px, transparent 1px);
+	background-position: 0 0, 2px 2px;
+	background-size: 4px 4px;
+
+	overflow: auto;
+}
+
+.modal {
+	margin: auto;
+	padding: size($spacer * 0.5);
+
+	color: $text-color;
+
+	background-color: $background-color;
+	border: size(2) dotted $text-color;
+	outline: size(2) solid $background-color;
+}

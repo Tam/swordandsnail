@@ -5,12 +5,14 @@ import { Provider } from 'urql';
 import { SessionData } from '../lib/client';
 import Header from '../components/Header';
 import PreferencesHook from '../components/PreferencesHook';
+import { useRouter } from 'next/router';
 
 function MyApp ({ Component, pageProps }) {
+	const router = useRouter();
 	const [client, preventRenderDuringRedirect] = useCreateClient({
 		defaultPostLoginRedirect: '/games',
-		unprotectedRoutes: ['/', '/forgot', '/reset'],
-		agnosticRoutes: ['/400', '/500', '/error'],
+		unprotectedRoutes: ['/signin', '/forgot', '/reset', '/signup'],
+		agnosticRoutes: ['/', '/400', '/500', '/_error'],
 	});
 
 	const head = (
@@ -28,7 +30,7 @@ function MyApp ({ Component, pageProps }) {
 		<Provider value={client}>
 			<PreferencesHook />
 			{head}
-			{SessionData.isLoggedIn && <Header />}
+			{SessionData.isLoggedIn && router.pathname !== '/' && router.pathname !== '/_error' && <Header />}
 			<Component {...pageProps} />
 		</Provider>
 	);

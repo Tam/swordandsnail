@@ -26,6 +26,10 @@ body {
 
 	color: $text-color;
 	background: $background-color;
+
+	&.ReactModal__Body--open {
+		overflow: hidden;
+	}
 }
 
 #__next {
@@ -34,9 +38,13 @@ body {
 	margin: auto;
 }
 
-//::selection {
-//	background-color: change-color($text-color, $alpha: 0.25);
-//}
+p {
+	line-height: 1.7em;
+
+	&:not(:last-child) {
+		margin-bottom: size(15);
+	}
+}
 
 a {
 	color: $text-color;
@@ -44,4 +52,13 @@ a {
 	&:hover {
 		text-decoration-thickness: size(2);
 	}
+}
+
+code {
+	display: inline-block;
+	padding: size(1) size(3);
+	color: $background-color;
+	font-family: $font-family-mono;
+	background-color: $text-color;
+	border-radius: size(3);
 }

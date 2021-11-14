@@ -14,14 +14,6 @@
 		position: absolute;
 	}
 
-	p {
-		line-height: 1.5em;
-
-		&:not(:last-child) {
-			margin-bottom: size(10);
-		}
-	}
-
 	&::after {
 		content: '';
 		position: absolute;

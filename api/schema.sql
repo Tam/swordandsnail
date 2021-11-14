@@ -241,11 +241,11 @@ grant execute on function public.viewer () to player;
 
 -- Register
 
-create or replace function public.register (
+create or replace function private.register (
   email varchar(256),
   password varchar(72),
   name varchar
-) returns boolean as $$
+) returns uuid as $$
 declare
   _id uuid;
 begin
@@ -255,7 +255,7 @@ begin
   -- Check if email already exists
   if (select true from public.account a where a.email = lower($1)) then
     raise warning 'email_taken';
-    return false;
+    return null;
   end if;
 
   -- Create user
@@ -270,11 +270,11 @@ begin
   -- Create preferences
   insert into public.preferences (user_id) values (_id);
 
-  return true;
+  return _id;
 end;
 $$ language plpgsql volatile security definer;
 
-grant execute on function public.register (varchar, varchar, varchar) to anonymous;
+grant execute on function private.register (varchar, varchar, varchar) to server;
 
 -- Authenticate
 

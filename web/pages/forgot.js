@@ -28,7 +28,7 @@ export default function Forgot () {
 
 			<footer>
 				<Button type="submit" disabled={sent}>Send Reset Link</Button>
-				<A href="/">&larr; Back</A>
+				<A href="/signin">&larr; Back</A>
 			</footer>
 		</AuthForm>
 	);

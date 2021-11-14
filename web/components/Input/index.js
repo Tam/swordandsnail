@@ -12,7 +12,7 @@ export default function Input ({
 }) {
 	return (
 		<label className={css.label}>
-			<span>{label}</span>
+			{label && <span>{label}</span>}
 			{type === 'select' ? (
 				<span className={css.select}>
 					<select

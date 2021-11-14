@@ -168,12 +168,7 @@ The root mutation type which contains root level fields which mutate data.
 type Mutation {
   authenticate(email: String!, password: String!): Boolean
   logout: Boolean
-  register(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: RegisterInput!
-  ): RegisterPayload
+  register(email: String!, name: String!, password: String!): Boolean
 
   """Updates a single `Account` using a unique key and a patch."""
   updateAccount(
@@ -414,34 +409,6 @@ type Query implements Node {
     orderBy: [UsersOrderBy!]
   ): [User!]
   viewer: User
-}
-
-"""All input for the `register` mutation."""
-input RegisterInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-  email: String!
-  name: String!
-  password: String!
-}
-
-"""The output of our `register` mutation."""
-type RegisterPayload {
-  boolean: Boolean
-
-  """
-  The exact same `clientMutationId` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
 }
 
 enum Role {

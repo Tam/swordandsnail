@@ -21,6 +21,10 @@
 		font-size: size(32);
 
 		border-bottom: 2px solid $text-color;
+
+		a {
+			text-decoration: none;
+		}
 	}
 
 	h2 {

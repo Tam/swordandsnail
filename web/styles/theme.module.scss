@@ -3,22 +3,38 @@
 .themeLight {
 	--primary: #242426;
 	--secondary: #F4F2EF;
+
+	::selection {
+		background-color: change-color(#242426, $alpha: 0.25);
+	}
 }
 
 .themeDark {
 	--primary: #F4F2EF;
 	--secondary: #242426;
+
+	::selection {
+		background-color: change-color(#F4F2EF, $alpha: 0.25);
+	}
 }
 
 .themeSystem {
 	@media (prefers-color-scheme: dark) {
 		--primary: #F4F2EF;
 		--secondary: #242426;
+
+		::selection {
+			background-color: change-color(#F4F2EF, $alpha: 0.25);
+		}
 	}
 
 	@media (prefers-color-scheme: light) {
 		--primary: #242426;
 		--secondary: #F4F2EF;
+
+		::selection {
+			background-color: change-color(#242426, $alpha: 0.25);
+		}
 	}
 }
 

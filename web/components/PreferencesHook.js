@@ -9,6 +9,7 @@ export default function PreferencesHook () {
             query GetPreferences {
                 viewer {
                     preference {
+	                    id: nodeId
                         font
                         theme
                     }
