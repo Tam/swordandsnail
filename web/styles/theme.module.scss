@@ -1,0 +1,27 @@
+@import "./variables";
+
+.themeLight {
+	--primary: #242426;
+	--secondary: #F4F2EF;
+}
+
+.themeDark {
+	--primary: #F4F2EF;
+	--secondary: #242426;
+}
+
+.themeSystem {
+	@media (prefers-color-scheme: dark) {
+		--primary: #F4F2EF;
+		--secondary: #242426;
+	}
+
+	@media (prefers-color-scheme: light) {
+		--primary: #242426;
+		--secondary: #F4F2EF;
+	}
+}
+
+.fontMono { font-family: $font-family-mono }
+.fontDuo { font-family: $font-family-duo }
+.fontQuattro { font-family: $font-family-quattro }

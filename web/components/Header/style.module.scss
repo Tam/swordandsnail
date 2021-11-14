@@ -30,6 +30,9 @@
 		height: 100%;
 		padding: size($spacer * 0.5);
 
+		color: inherit;
+		font-size: size(18);
+
 		appearance: none;
 		background: none;
 		border: none;
@@ -40,6 +43,7 @@
 
 .menu {
 	position: absolute;
+	z-index: 2;
 	top: 100%;
 	right: 0;
 
@@ -48,6 +52,21 @@
 	background: $background-color;
 	border: size(2) solid $text-color;
 	border-top: none;
+
+	&::before {
+		content: '';
+		position: absolute;
+		z-index: -2;
+		top: size(2);
+		left: size(-6);
+
+		display: block;
+		width: calc(100% + #{size(4)});
+		height: calc(100% - #{size(2)});
+
+		border: size(4) solid $background-color;
+		border-top: none;
+	}
 
 	button,
 	a {

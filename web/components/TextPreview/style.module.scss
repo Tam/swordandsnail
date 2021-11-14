@@ -1,0 +1,50 @@
+@import "../../styles/variables";
+
+.wrap {
+	position: relative;
+	width: 100%;
+	height: size(300);
+	padding: size(15);
+	margin-bottom: size(24);
+	border: size(2) dotted $text-color;
+
+	overflow: hidden;
+
+	> div {
+		position: absolute;
+	}
+
+	p {
+		line-height: 1.5em;
+
+		&:not(:last-child) {
+			margin-bottom: size(10);
+		}
+	}
+
+	&::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+
+		width: calc(100% - #{size(8)});
+		height: calc(100% - #{size(8)});
+
+		border: size(4) solid $background-color;
+		pointer-events: none;
+	}
+}
+
+.width {
+	position: absolute;
+	z-index: 2;
+	top: 0;
+	right: 0;
+	padding: size(7) size(10);
+
+	background-color: $background-color;
+	border-left: size(2) dotted $text-color;
+	border-bottom: size(2) dotted $text-color;
+	box-shadow: 0 0 0 size(3.5) $background-color;
+}

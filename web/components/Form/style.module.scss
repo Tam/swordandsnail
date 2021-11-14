@@ -1,0 +1,17 @@
+@import "../../styles/variables";
+
+.form {
+
+	> footer:last-child {
+		display: flex;
+		align-items: center;
+
+		> *:not(:last-child) {
+			margin: 0 size($spacer * 0.5) 0 0 !important;
+		}
+
+		> *:last-child {
+			margin: 0 !important;
+		}
+	}
+}

@@ -2,6 +2,9 @@ import '../styles/globals.scss';
 import useCreateClient from '../hooks/useCreateClient';
 import Head from 'next/head';
 import { Provider } from 'urql';
+import { SessionData } from '../lib/client';
+import Header from '../components/Header';
+import PreferencesHook from '../components/PreferencesHook';
 
 function MyApp ({ Component, pageProps }) {
 	const [client, preventRenderDuringRedirect] = useCreateClient({
@@ -23,7 +26,9 @@ function MyApp ({ Component, pageProps }) {
 
 	return (
 		<Provider value={client}>
+			<PreferencesHook />
 			{head}
+			{SessionData.isLoggedIn && <Header />}
 			<Component {...pageProps} />
 		</Provider>
 	);

@@ -1,0 +1,33 @@
+@import '../../styles/variables';
+
+.wrap {
+	margin-bottom: size(24);
+
+	figure {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding: size(15);
+		border: size(2) dotted $text-color;
+
+		&:not(:last-child) {
+			margin-bottom: size($spacer * 0.5);
+		}
+	}
+
+	figcaption {
+		margin-top: size(10);
+	}
+
+	p {
+		line-height: 1.5em;
+
+		&:not(:last-child) {
+			margin-bottom: size(10);
+		}
+	}
+}
+
+.mono { font-family: $font-family-mono }
+.duo { font-family: $font-family-duo }
+.quattro { font-family: $font-family-quattro }

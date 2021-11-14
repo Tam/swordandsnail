@@ -6,17 +6,35 @@ export default function Input ({
 	type = 'text',
 	required = false,
 	autoFocus = false,
+	defaultValue,
+	children,
+	...props
 }) {
 	return (
 		<label className={css.label}>
 			<span>{label}</span>
-			<input
-				className={css.input}
-				name={name}
-				type={type}
-				required={required}
-				autoFocus={autoFocus}
-			/>
+			{type === 'select' ? (
+				<span className={css.select}>
+					<select
+						name={name}
+						required={required}
+						defaultValue={defaultValue}
+						{...props}
+					>
+						{children}
+					</select>
+				</span>
+			) : (
+				<input
+					className={css.input}
+					name={name}
+					type={type}
+					required={required}
+					autoFocus={autoFocus}
+					defaultValue={defaultValue}
+					{...props}
+				/>
+			)}
 		</label>
 	);
 }

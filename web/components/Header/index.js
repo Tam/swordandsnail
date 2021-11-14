@@ -35,9 +35,13 @@ export default function Header () {
 			);
 		};
 
+		const onRouteChange = () => setMenuOpen(false);
+
+		router.events.on('routeChangeStart', onRouteChange);
 		document.addEventListener('click', onBodyClick);
 
 		return () => {
+			router.events.off('routeChangeStart', onRouteChange);
 			document.removeEventListener('click', onBodyClick);
 		};
 	}, [menuOpen, menu.current]);
@@ -59,18 +63,33 @@ export default function Header () {
 			<A href="/games" className={css.logo}>Sword & Snail</A>
 
 			<div className={css.menuWrap}>
-				<button onClick={onToggleMenuClick}>@</button>
+				<button
+					onClick={onToggleMenuClick}
+					title="User Menu"
+					id="userMenuBtn"
+					aria-haspopup="true"
+					aria-controls="userMenu"
+					aria-expanded={menuOpen}
+				>
+					@
+				</button>
 
 				{menuOpen && (
-					<ul className={css.menu} ref={menu}>
-						<li><a href="/account">My Account</a></li>
+					<ul
+						className={css.menu}
+						ref={menu}
+						id="userMenu"
+						role="menu"
+						aria-labelledby="userMenuBtn"
+					>
+						<li><A href="/account" role="menuitem">My Account</A></li>
 						{isDesigner && (
-							<li><a href="/manage">My Games</a></li>
+							<li><A href="/manage" role="menuitem">My Games</A></li>
 						)}
 						{isAdmin && (
-							<li><a href="/admin">Admin</a></li>
+							<li><A href="/admin" role="menuitem">Admin</A></li>
 						)}
-						<li><Button onClick={onLogoutClick}>Sign out</Button></li>
+						<li><Button onClick={onLogoutClick} role="menuitem">Sign out</Button></li>
 					</ul>
 				)}
 			</div>

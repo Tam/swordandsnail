@@ -30,11 +30,13 @@ body {
 
 #__next {
 	height: 100%;
+	max-width: size(1400);
+	margin: auto;
 }
 
-::selection {
-	background-color: change-color($text-color, $alpha: 0.25);
-}
+//::selection {
+//	background-color: change-color($text-color, $alpha: 0.25);
+//}
 
 a {
 	color: $text-color;

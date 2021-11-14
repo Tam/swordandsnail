@@ -179,7 +179,8 @@ create policy account_update on public.account for update using (
 create table if not exists public.preferences (
   user_id uuid primary key references public.user (id) on delete cascade,
   text_column_width int not null default 80,
-  theme private.theme not null default 'system'
+  theme private.theme not null default 'system',
+  font varchar not null default 'quattro'
 );
 
 do $$ begin
@@ -253,7 +254,8 @@ begin
 
   -- Check if email already exists
   if (select true from public.account a where a.email = lower($1)) then
-    raise exception 'email_taken';
+    raise warning 'email_taken';
+    return false;
   end if;
 
   -- Create user
@@ -286,6 +288,26 @@ create or replace function private.authenticate (
 $$ language sql stable security definer;
 
 grant execute on function private.authenticate(varchar, varchar) to server;
+
+-- Update Password
+
+create or replace function public.update_password (
+  current_password varchar(72),
+  new_password varchar(72)
+) returns void as $$
+begin
+  if not exists(select 1 from public.account where user_id = util.current_user_id() and password_hash = crypt($1, password_hash)) then
+    raise warning 'invalid_password';
+    return;
+  end if;
+
+  update public.account
+  set password_hash = crypt($2, gen_salt('bf'))
+  where user_id = util.current_user_id();
+end;
+$$ language plpgsql volatile security definer;
+
+grant execute on function public.update_password(varchar, varchar) to player;
 
 -- Triggers
 -- =============================================================================
