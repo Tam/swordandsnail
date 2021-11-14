@@ -11,6 +11,7 @@ import e from '../../util/e';
 
 export default function Preferences () {
 	const [col, setCol] = useState(80)
+		, [font, setFont] = useState('quattro')
 		, [success, setSuccess] = useState(false);
 
 	const [{ data, fetching }] = useQuery({
@@ -46,7 +47,8 @@ export default function Preferences () {
 		setCol(data?.viewer?.preference?.textColumnWidth);
 	}, [data]);
 
-	const onColChange = e => setCol(e.target.value);
+	const onColChange = e => setCol(e.target.value)
+		, onFontChange = e => setFont(e.target.value);
 	const err = error?.graphQLErrors?.[0]?.message;
 
 	const onSubmit = async patch => {
@@ -81,13 +83,14 @@ export default function Preferences () {
 					name="font"
 					type="select"
 					defaultValue={data?.viewer?.preference?.font.toLowerCase()}
+					onChange={onFontChange}
 				>
 					<option value="mono">Mono</option>
 					<option value="duo">Duo</option>
 					<option value="quattro">Quattro</option>
 				</Input>
 
-				<FontPreviews />
+				<FontPreviews font={font} />
 
 				<Input
 					label="Text Column Width"
