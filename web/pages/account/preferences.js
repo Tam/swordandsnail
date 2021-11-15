@@ -87,6 +87,8 @@ export default function Preferences () {
 
 				<ThemePreview theme={theme} />
 
+				<hr/>
+
 				<Input
 					label="Font"
 					name="font"
@@ -100,6 +102,8 @@ export default function Preferences () {
 				</Input>
 
 				<FontPreviews font={font} />
+
+				<hr/>
 
 				<Input
 					label="Text Column Width"

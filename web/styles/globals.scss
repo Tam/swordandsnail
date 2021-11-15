@@ -54,6 +54,25 @@ a {
 	}
 }
 
+hr {
+	margin: size($spacer);
+	text-align: center;
+	border: none;
+
+	&::after {
+		content: '';
+		display: inline-block;
+		width: size(50);
+		height: size(4);
+
+		background-image:
+			radial-gradient($text-color 1px, transparent 1px),
+			radial-gradient($text-color 1px, transparent 1px);
+		background-position: 0 0, 2px 2px;
+		background-size: 4px 4px;
+	}
+}
+
 code {
 	display: inline-block;
 	padding: size(1) size(3);
