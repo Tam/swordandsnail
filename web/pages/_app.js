@@ -6,6 +6,7 @@ import { SessionData } from '../lib/client';
 import Header from '../components/Header';
 import PreferencesHook from '../components/PreferencesHook';
 import { useRouter } from 'next/router';
+import Footer from '../components/Footer';
 
 function MyApp ({ Component, pageProps }) {
 	const router = useRouter();
@@ -31,7 +32,8 @@ function MyApp ({ Component, pageProps }) {
 			<PreferencesHook />
 			{head}
 			{SessionData.isLoggedIn && router.pathname !== '/' && router.pathname !== '/_error' && <Header />}
-			<Component {...pageProps} />
+			<main><Component {...pageProps} /></main>
+			<Footer />
 		</Provider>
 	);
 }

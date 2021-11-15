@@ -33,9 +33,16 @@ body {
 }
 
 #__next {
+	display: flex;
+	flex-direction: column;
 	height: 100%;
 	max-width: size(1400);
 	margin: auto;
+}
+
+main {
+	flex: 1;
+	padding: size($spacer);
 }
 
 p {

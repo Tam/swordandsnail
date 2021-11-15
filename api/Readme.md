@@ -2,3 +2,89 @@
 
 - `invalid_password` Invalid password
 - `email_taken` Email already in use
+
+
+## Game Structure
+- Game
+  - id
+  - name
+  - ownerId
+  - createdAt
+  - deletedAt
+- Game Release
+  - id
+  - gameId
+  - versionName
+  - versionNumber
+  - description (text)
+  - rules (text)
+  - createdAt
+  - updatedAt
+  - publishedAt
+  - deletedAt
+- Lookup Table
+  - id
+  - name
+  - gameReleaseId
+  - pool (number of times this table can be depleted and reshuffled, null means infinite)
+  - type (pick, random)
+- Lookup Table Item
+  - id
+  - lookupTableId
+  - name
+  - description
+  - properties (jsonb, contains stuff like "enables action A", "triggers action B", "collectable", etc.)
+- Action
+  - id
+  - name
+  - gameReleaseId
+  - type (lookup_table, phase, discard, stat_change, load_grid)
+    - lookup_table: interact with given lookup table
+    - phase: start a new phase
+    - discard: discard an item from the players inventory
+    - stat_change: i.e. reduce health
+    - load_grid: will load a previously generated grid
+  - lookupTableId
+  - lookupTableItemId
+  - phaseId
+  - gridId
+  - value (transient number value, useful for number of items required to discard, etc.)
+  - properties (jsonb, "grid_alterable", "grid_static", etc.)
+- Phase
+  - id
+  - name
+  - gameReleaseId
+  - type (journal, grid, encounter)
+    - journal: starts a new journal entry for the player (not sure if needed if we go with the interspersed idea below)
+    - grid: creates a stored grid
+    - encounter: starts the creation and interaction of an NPC
+- Phase Grid (the grids this phase can use)
+  - phaseId
+  - gridArchetypeId
+- Phase Encounter (the encounters this phase can trigger)
+  - phaseId
+  - encounterArchetypeId
+- Grid Archetype
+  - id
+  - name
+  - gameReleaseId
+  - width (can be infinite)
+  - height (can be infinite)
+  - capacity (number of items that can populate the grid, allowing for empty space)
+- Grid Lookup Table (the lookup tables that can populate the grid)
+  - gridArchetypeId
+  - lookupTableId
+  - limit (the number of items from this lookup table that can appear in the grid)
+- Encounter Archetype
+  - id
+  - name
+  - gameReleaseId
+  - capacity (the max number of items from lookup tables that can be drawn)
+  - properties (jsonb, enable action c, etc.)
+- Encounter Lookup Table
+  - encounterArchetypeId
+  - lookupTableId
+  - limit (the number of items from this lookup table that can appear in the encounter)
+
+// TODO: Character Sheets
+// TODO: Game saves / flow (i'm thinking like notion where the pre-defined elements above are interspersed between the players text)

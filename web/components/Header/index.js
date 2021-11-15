@@ -48,6 +48,11 @@ export default function Header () {
 
 	const onToggleMenuClick = () => setMenuOpen(o => !o);
 
+	const onToggleFullscreenClick = () => {
+		if (document.fullscreenElement) document.exitFullscreen();
+		else document.documentElement.requestFullscreen();
+	};
+
 	const onLogoutClick = async () => {
 		SessionData.isLoggedIn = false;
 		await logout();
@@ -63,6 +68,8 @@ export default function Header () {
 			<A href="/games" className={css.logo}>Sword & Snail</A>
 
 			<div className={css.menuWrap}>
+				<button onClick={onToggleFullscreenClick} title="Toggle Fullscreen">[ ]</button>
+
 				<button
 					onClick={onToggleMenuClick}
 					title="User Menu"
@@ -84,7 +91,7 @@ export default function Header () {
 					>
 						<li><A href="/account" role="menuitem">My Account</A></li>
 						{isDesigner && (
-							<li><A href="/manage" role="menuitem">My Games</A></li>
+							<li><A href="/studio" role="menuitem">Studio</A></li>
 						)}
 						{isAdmin && (
 							<li><A href="/admin" role="menuitem">Admin</A></li>

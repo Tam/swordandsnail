@@ -1,0 +1,13 @@
+@import "../../styles/variables";
+
+.footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: 0 size($spacer * 0.5);
+	padding: size($spacer * 0.5) size($spacer * 0.5) size($spacer * 0.75) size($spacer * 0.5);
+
+	font-size: size(12);
+
+	border-top: size(2) dotted $text-color;
+}
