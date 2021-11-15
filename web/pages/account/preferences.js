@@ -8,10 +8,12 @@ import Button from '../../components/Button';
 import Form from '../../components/Form';
 import Notice from '../../components/Error';
 import e from '../../util/e';
+import ThemePreview from '../../components/ThemePreview';
 
 export default function Preferences () {
 	const [col, setCol] = useState(80)
 		, [font, setFont] = useState('quattro')
+		, [theme, setTheme] = useState('system')
 		, [success, setSuccess] = useState(false);
 
 	const [{ data, fetching }] = useQuery({
@@ -44,11 +46,14 @@ export default function Preferences () {
 	`);
 
 	useEffect(() => {
-		setCol(data?.viewer?.preference?.textColumnWidth);
+		setCol(d => data?.viewer?.preference?.textColumnWidth ?? d);
+		setFont(d => data?.viewer?.preference?.font ?? d);
+		setTheme(d => data?.viewer?.preference?.theme ?? d);
 	}, [data]);
 
 	const onColChange = e => setCol(e.target.value)
-		, onFontChange = e => setFont(e.target.value);
+		, onFontChange = e => setFont(e.target.value)
+		, onThemeChange = e => setTheme(e.target.value);
 	const err = error?.graphQLErrors?.[0]?.message;
 
 	const onSubmit = async patch => {
@@ -72,11 +77,15 @@ export default function Preferences () {
 					name="theme"
 					type="select"
 					defaultValue={data?.viewer?.preference?.theme.toLowerCase()}
+					onChange={onThemeChange}
 				>
 					<option value="light">Light</option>
 					<option value="dark">Dark</option>
+					<option value="gameboy">Game Boy</option>
 					<option value="system">System</option>
 				</Input>
+
+				<ThemePreview theme={theme} />
 
 				<Input
 					label="Font"

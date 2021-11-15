@@ -593,6 +593,7 @@ input StringFilter {
 
 enum Theme {
   DARK
+  GAMEBOY
   LIGHT
   SYSTEM
 }

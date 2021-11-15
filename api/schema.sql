@@ -59,6 +59,8 @@ do $$ begin
     );
   end if;
 
+  alter type private.theme add value 'gameboy';
+
 end $$;
 
 -- RLS

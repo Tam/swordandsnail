@@ -2,6 +2,7 @@ import { gql, useQuery } from 'urql';
 import { useEffect } from 'react';
 import css from '../styles/theme.module.scss';
 import cls from '../util/cls';
+import capitalize from '../util/capitalize';
 
 export default function PreferencesHook () {
 	const [{ data }] = useQuery({
@@ -22,16 +23,8 @@ export default function PreferencesHook () {
 
 	useEffect(() => {
 		document.body.className = cls(
-			{
-				'light': css.themeLight,
-				'dark': css.themeDark,
-				'system': css.themeSystem,
-			}[preferences?.theme?.toLowerCase() ?? 'system'],
-			{
-				'mono': css.fontMono,
-				'duo': css.fontDuo,
-				'quattro': css.fontQuattro,
-			}[preferences?.font?.toLowerCase() ?? 'quattro'],
+			css[`theme${capitalize(preferences?.theme?.toLowerCase() ?? 'system')}`],
+			css[`font${capitalize(preferences?.font?.toLowerCase() ?? 'quattro')}`],
 		);
 	}, [preferences]);
 

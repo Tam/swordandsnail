@@ -1,0 +1,9 @@
+@import "../../styles/variables";
+
+.themePreview {
+	margin-bottom: size(24);
+	padding: size(24);
+	color: $text-color;
+	background-color: $background-color;
+	border: size(2) dotted $text-color;
+}

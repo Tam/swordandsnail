@@ -18,6 +18,15 @@
 	}
 }
 
+.themeGameboy {
+	--primary: #a0cf0a;
+	--secondary: #003f00;
+
+	::selection {
+		background-color: change-color(#a0cf0a, $alpha: 0.25);
+	}
+}
+
 .themeSystem {
 	@media (prefers-color-scheme: dark) {
 		--primary: #F4F2EF;
