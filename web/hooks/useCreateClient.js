@@ -2,6 +2,7 @@ import { useEffect, useMemo, useReducer, useState } from 'react';
 import unfetch from 'isomorphic-unfetch';
 import createClient, { SessionData, URI } from '../lib/client';
 import { useRouter } from 'next/router';
+import Cookies from 'js-cookie';
 
 /**
  * Usage:
@@ -49,11 +50,13 @@ export default function useCreateClient ({
 			credentials: 'include',
 			body: JSON.stringify({
 				operationName: 'CheckAuth',
-				query: 'query CheckAuth { isAuthenticated }',
+				query: 'mutation CheckAuth { requestSsrid (input: {}) { string } }',
 			}),
 			headers: { 'Content-Type': 'application/json' },
 		}).then(r => r.json()).then(res => {
-			SessionData.isLoggedIn = res?.data?.isAuthenticated ?? false;
+			const ssrid = res?.data?.requestSsrid?.string;
+			Cookies.set('snail.ssrid', ssrid, { secure: true, sameSite: 'strict' });
+			SessionData.isLoggedIn = ssrid !== null;
 		}).finally(() => {
 			setIsChecking(false);
 			refresher();

@@ -3,13 +3,15 @@ import AuthForm from '../components/AuthForm';
 import Button from '../components/Button';
 import A from '../components/A';
 import Notice from '../components/Error';
-import { gql, useMutation } from 'urql';
+import { gql, useClient, useMutation } from 'urql';
 import { SessionData } from '../lib/client';
 import { useRouter } from 'next/router';
+import Cookies from 'js-cookie';
 
 export default function Home () {
 	const router = useRouter();
 
+	const client = useClient();
 	const [{ data, fetching }, login] = useMutation(gql`
 		mutation Login (
 			$email: String!
@@ -29,6 +31,15 @@ export default function Home () {
 		});
 
 		if (data?.authenticate) {
+			const { data } = await client.mutation(gql`
+                mutation CheckAuth { 
+	                requestSsrid (input: {}) { 
+		                string 
+	                }
+                }
+			`).toPromise();
+
+			Cookies.set('snail.ssrid', data?.requestSsrid?.string, { secure: true, sameSite: 'strict' });
 			SessionData.isLoggedIn = true;
 			await router.push('/games');
 		}

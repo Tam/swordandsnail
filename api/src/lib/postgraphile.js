@@ -112,6 +112,7 @@ const postgraphileOptions = dbPool => ({
 				role,
 				'session.user_id': user_id,
 				'session.admin': isAdmin.toString(),
+				'session.id': req?.sessionID,
 			};
 		}
 

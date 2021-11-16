@@ -22,6 +22,10 @@ create or replace function type_missing (typename varchar) returns boolean as $$
   select not exists (select true from pg_type where typname = typename)
 $$ language sql stable;
 
+create or replace function type_missing_value (typename varchar, val varchar) returns boolean as $$
+  select not exists(select 1 from pg_enum e inner join pg_type t on t.typname = typename and t.typcategory = 'E' where e.enumlabel = val and e.enumtypid = t.oid);
+$$ language sql stable;
+
 create or replace function col_missing (tblname varchar, colname varchar) returns boolean as $$
   select not exists (select true from information_schema.columns where table_name = tblname and column_name = colname)
 $$ language sql stable;
@@ -59,7 +63,9 @@ do $$ begin
     );
   end if;
 
-  alter type private.theme add value 'gameboy';
+  if type_missing_value('theme', 'gameboy') then
+    alter type private.theme add value 'gameboy';
+  end if;
 
 end $$;
 
@@ -214,12 +220,15 @@ create table if not exists private.session (
   sid    varchar not null collate "default",
   sess   json not null,
   expire timestamp(6) not null,
+  ssrid  varchar default null,
   primary key (sid) not deferrable initially immediate
 ) with (oids = false);
 
 create index if not exists idx_session_expire on private.session(expire);
 
--- Functions
+alter table private.session add column if not exists ssrid varchar default null;
+
+  -- Functions
 -- =============================================================================
 
 -- Account / Auth
@@ -232,6 +241,63 @@ create or replace function public.is_authenticated () returns boolean as $$
 $$ language sql stable;
 
 grant execute on function public.is_authenticated () to anonymous, player;
+
+-- SSRID
+
+create or replace function public.request_ssrid () returns varchar as $$
+declare
+  _id uuid = util.current_user_id();
+  _sid varchar;
+  _ssrid varchar;
+begin
+  if _id is null or _id = uuid_nil() then
+    return null;
+  end if;
+
+  _sid := current_setting('session.id', true)::varchar;
+
+  if _sid is null then
+    return null;
+  end if;
+
+  select ssrid
+  into _ssrid
+  from private.session
+  where sid = _sid;
+
+  if _ssrid is null then
+    _ssrid := encode(gen_random_bytes(10), 'base64');
+    update private.session
+    set ssrid = _ssrid
+    where sid = _sid;
+  end if;
+
+  return _ssrid;
+end;
+$$ language plpgsql volatile security definer;
+
+grant execute on function public.request_ssrid () to player;
+
+create or replace function public.verify_ssrid (ssrid varchar) returns varchar as $$
+declare
+  _id uuid;
+  _role varchar;
+begin
+  select (s.sess->>'user_id')::uuid
+  into _id
+  from private.session s
+  where s.ssrid = $1;
+
+  select role
+  into _role
+  from public.account
+  where user_id = _id;
+
+  return _role;
+end;
+$$ language plpgsql stable security definer;
+
+grant execute on function public.verify_ssrid (varchar) to anonymous;
 
 -- Viewer
 
@@ -403,3 +469,5 @@ create trigger before_account_update
 -- =============================================================================
 
 drop function if exists type_missing(varchar);
+drop function if exists type_missing_value(varchar, varchar);
+drop function if exists col_missing(varchar, varchar);
