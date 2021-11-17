@@ -1,8 +1,8 @@
 import { authExchange } from '@urql/exchange-auth';
 import { retryExchange } from '@urql/exchange-retry';
 import { cacheExchange, dedupExchange, fetchExchange, createClient as _createClient } from 'urql';
+import { URI } from './consts';
 
-export const URI = process.env.NEXT_PUBLIC_API || 'https://dev.api.swordandsnail.com/graphql';
 export const SessionData = {
 	isLoggedIn: false,
 };

@@ -1,0 +1,87 @@
+@import "../../styles/variables";
+
+.stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(#{size(150)}, 1fr));
+	grid-gap: size($spacer * 0.5);
+}
+
+.stat {
+	position: relative;
+
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	padding: size($spacer) size($spacer * 0.5);
+
+	border: 2px dotted $text-color;
+	border-radius: size(6);
+	box-shadow: inset 0 0 0 size(3) $background-color;
+
+	background-image:
+		radial-gradient($text-color 1px, transparent 1px),
+		radial-gradient($text-color 1px, transparent 1px);
+	background-position: 0 0, 2px 2px;
+	background-size: 4px 4px;
+
+	overflow: hidden;
+
+	> * {
+		position: relative;
+		z-index: 2;
+	}
+
+	&::before,
+	&::after {
+		content: '';
+		position: absolute;
+		z-index: 1;
+		top: 50%;
+		left: 50%;
+
+		display: block;
+		border-radius: 50%;
+
+		transform: translate3d(-50%, -57%, 0);
+		background-color: $background-color;
+		opacity: 0.25;
+	}
+
+	&::before {
+		width: 100%;
+		padding-top: 100%;
+	}
+
+	&::after {
+		width: 130%;
+		padding-top: 130%;
+	}
+}
+
+.value {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: size(100);
+	height: size(100);
+
+	font-size: size(40);
+	-webkit-text-stroke: size(10) $background-color;
+
+	background-color: $background-color;
+	border-radius: 50%;
+
+	&::before {
+		content: attr(data-value);
+		position: absolute;
+		-webkit-text-stroke: 0;
+		pointer-events: none;
+	}
+}
+
+.label {
+	margin-top: size(-8);
+	padding: size(5) size(10);
+	background-color: $background-color;
+	border-radius: size(4);
+}

@@ -1,4 +1,4 @@
-import { URI } from './client';
+import { URI } from './consts';
 
 export default async function verifyRole (req, role) {
 	const ssrid = req.cookies['snail.ssrid'];
@@ -14,8 +14,6 @@ export default async function verifyRole (req, role) {
 		}),
 		headers: { 'Content-Type': 'application/json' },
 	}).then(res => res.json());
-
-	console.log(res);
 
 	return res?.data?.verifySsrid.toLowerCase() === role.toLocaleString();
 }

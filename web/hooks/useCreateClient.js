@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useReducer, useState } from 'react';
 import unfetch from 'isomorphic-unfetch';
-import createClient, { SessionData, URI } from '../lib/client';
+import createClient, { SessionData } from '../lib/client';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
+import { URI } from '../lib/consts';
 
 /**
  * Usage:

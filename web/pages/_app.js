@@ -31,7 +31,7 @@ function MyApp ({ Component, pageProps }) {
 		<Provider value={client}>
 			<PreferencesHook />
 			{head}
-			{SessionData.isLoggedIn && router.pathname !== '/' && router.pathname !== '/_error' && <Header />}
+			{SessionData.isLoggedIn && router.pathname !== '/' && <Header />}
 			<main><Component {...pageProps} /></main>
 			<Footer />
 		</Provider>
