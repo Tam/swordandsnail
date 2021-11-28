@@ -10,6 +10,13 @@
 	grid-column: span 3;
 	margin-right: size($spacer);
 
+	ul {
+		margin-bottom: size($spacer);
+		padding-bottom: size($spacer);
+
+		border-bottom: 2px dotted $text-color;
+	}
+
 	a {
 		display: block;
 		padding: size(5) 0;

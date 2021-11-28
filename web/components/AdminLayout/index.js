@@ -11,7 +11,7 @@ const NavLink = ({ href, children }) => {
 	);
 };
 
-export default function AdminLayout ({ title, children }) {
+export default function AdminLayout ({ title, children, actions = null }) {
 	return (
 		<div className={css.wrap}>
 			<Title>Admin / {title}</Title>
@@ -21,6 +21,7 @@ export default function AdminLayout ({ title, children }) {
 					<NavLink href="users">Users</NavLink>
 					<NavLink href="pages">Pages</NavLink>
 				</ul>
+				{actions}
 			</aside>
 			<section className={css.content}>
 				{children}
