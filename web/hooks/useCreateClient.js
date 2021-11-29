@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useReducer, useState } from 'react';
-import unfetch from 'isomorphic-unfetch';
+import { useEffect, useMemo, useReducer } from 'react';
 import createClient, { SessionData } from '../lib/client';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
-import { URI } from '../lib/consts';
 
 /**
  * Usage:
@@ -40,39 +38,12 @@ export default function useCreateClient ({
 	unprotectedRoutes = [],
 	agnosticRoutes = ['/404', '/500'],
 }) {
-	const [isChecking, setIsChecking] = useState(true);
-
-	// Refresh all the things when the token changes
+	const router = useRouter();
 	const refresher = useReducer(() => ({}))[1];
 
 	useEffect(() => {
-		unfetch(URI, {
-			method: 'POST',
-			credentials: 'include',
-			body: JSON.stringify({
-				operationName: 'CheckAuth',
-				query: 'mutation CheckAuth { requestSsrid (input: {}) { string } }',
-			}),
-			headers: { 'Content-Type': 'application/json' },
-		}).then(r => r.json()).then(res => {
-			const ssrid = res?.data?.requestSsrid?.string;
-			Cookies.set('snail.ssrid', ssrid, { secure: true, sameSite: 'strict' });
-			SessionData.isLoggedIn = ssrid !== null;
-		}).finally(() => {
-			setIsChecking(false);
-			refresher();
-		});
-	}, []);
-
-	const router = useRouter()
-		, isLoggedIn = SessionData.isLoggedIn;
-
-	let preventRenderDuringRedirect = isChecking;
-
-	useEffect(() => {
-		// Do nothing if we're checking
-		if (isChecking)
-			return;
+		SessionData.isLoggedIn = !!Cookies.get('snail.ssrid');
+		refresher();
 
 		// Do nothing for agnostic routes
 		if (agnosticRoutes.indexOf(router.route) > -1)
@@ -81,25 +52,23 @@ export default function useCreateClient ({
 		// If the user is logged in and trying to access a no-auth route,
 		// redirect them to the dashboard
 		if (unprotectedRoutes.indexOf(router.route) > -1) {
-			if (isLoggedIn) {
+			if (SessionData.isLoggedIn) {
 				// redirectPostLogin(router, defaultPostLoginRedirect);
 				router.push(defaultPostLoginRedirect);
-				preventRenderDuringRedirect = true;
 			}
 			return;
 		}
 
 		// If they're trying to access any other route while not logged in,
 		// redirect them to login
-		if (!isLoggedIn) {
+		if (!SessionData.isLoggedIn) {
 			// Emit(Events.Notify, 'You must be logged in to view that page');
 			// setCookie('tripmapper_post_login', router.asPath);
 			router.push('/');
-			preventRenderDuringRedirect = true;
 		}
-	}, [isChecking, isLoggedIn, router.pathname]);
+	}, []);
 
 	return useMemo(() => {
-		return [createClient(), preventRenderDuringRedirect];
-	}, [SessionData.isLoggedIn, isChecking]);
+		return createClient();
+	}, []);
 }

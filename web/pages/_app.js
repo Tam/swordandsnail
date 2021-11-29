@@ -10,27 +10,20 @@ import Footer from '../components/Footer';
 
 function MyApp ({ Component, pageProps }) {
 	const router = useRouter();
-	const [client, preventRenderDuringRedirect] = useCreateClient({
+	const client = useCreateClient({
 		defaultPostLoginRedirect: '/games',
 		unprotectedRoutes: ['/signin', '/forgot', '/reset', '/signup'],
 		agnosticRoutes: ['/', '/400', '/500', '/_error'],
 	});
 
-	const head = (
-		<Head>
-			{process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production' && <meta name="robots" content="noindex" />}
-			<title>Sword & Snail</title>
-			<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐌</text></svg>" />
-		</Head>
-	);
-
-	if (preventRenderDuringRedirect)
-		return head;
-
 	return (
 		<Provider value={client}>
 			<PreferencesHook />
-			{head}
+			<Head>
+				{process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production' && <meta name="robots" content="noindex" />}
+				<title>Sword & Snail</title>
+				<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐌</text></svg>" />
+			</Head>
 			{SessionData.isLoggedIn && router.pathname !== '/' && <Header />}
 			<main><Component {...pageProps} /></main>
 			<Footer />
