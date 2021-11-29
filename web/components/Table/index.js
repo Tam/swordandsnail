@@ -4,7 +4,7 @@ import A from '../A';
 import capitalize from '../../util/capitalize';
 import cls from '../../util/cls';
 
-function Table ({
+export default function Table ({
 	columns,
 	data,
 }) {
@@ -47,6 +47,3 @@ Table.timestamp = d => (new Date(d)).toLocaleString(void 0, {
 Table.link = (href, overrideValue) => (value, row) => <A href={typeof href === 'function' ? href(value, row) : href}>{overrideValue ?? value}</A>;
 
 Table.capitalize = value => capitalize(value, true);
-
-Table.displayName = 'Table';
-export default Table;

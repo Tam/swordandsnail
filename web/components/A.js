@@ -8,7 +8,7 @@ export default function A ({
 	elProps = {},
 }) {
 	return (
-		<Link href={href}>
+		<Link href={href} passHref>
 			<El {...elProps} className={className}>
 				{children}
 			</El>

@@ -7,6 +7,8 @@ export default function Markdown () {
 	useEffect(() => {
 		if (!input.current) return;
 
+		const el = input.current;
+
 		const onPaste = e => {
 			e.preventDefault();
 			const paste = (e.clipboardData || window.clipboardData).getData('text/plain');
@@ -18,8 +20,8 @@ export default function Markdown () {
 			document.execCommand('insertText', false, paste);
 		};
 
-		input.current.addEventListener('paste', onPaste);
-		input.current.textContent =
+		el.addEventListener('paste', onPaste);
+		el.textContent =
 			'I have a basic editor based on execCommand following the sample introduced here. There are three ways to paste text within the execCommand area:\n' +
 			'\n' +
 			'    Ctrl+V\n' +
@@ -35,7 +37,7 @@ export default function Markdown () {
 			'    How to add listener to Right Click -> Paste?';
 
 		return () => {
-			input.current.removeEventListener('paste', onPaste);
+			el.removeEventListener('paste', onPaste);
 		};
 	}, [input]);
 
