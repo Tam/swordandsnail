@@ -48,4 +48,5 @@ Table.link = (href, overrideValue) => (value, row) => <A href={typeof href === '
 
 Table.capitalize = value => capitalize(value, true);
 
+Table.displayName = 'Table';
 export default Table;
