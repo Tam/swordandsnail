@@ -44,7 +44,7 @@ export default function Header () {
 			router.events.off('routeChangeStart', onRouteChange);
 			document.removeEventListener('click', onBodyClick);
 		};
-	}, [menuOpen, menu.current, router.events]);
+	}, [menuOpen, menu, router.events]);
 
 	const onToggleMenuClick = () => setMenuOpen(o => !o);
 

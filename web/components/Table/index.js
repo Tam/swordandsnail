@@ -4,6 +4,18 @@ import A from '../A';
 import capitalize from '../../util/capitalize';
 import cls from '../../util/cls';
 
+export const TblFmt = {
+	timestamp: d => (new Date(d)).toLocaleString(void 0, {
+		dateStyle: 'short',
+		timeStyle: 'short',
+	}),
+
+	link: (href, overrideValue) => (value, row) =>
+		<A href={typeof href === 'function' ? href(value, row) : href}>{overrideValue ?? value}</A>,
+
+	capitalize: value => capitalize(value, true),
+};
+
 export default function Table ({
 	columns,
 	data,
@@ -38,12 +50,3 @@ export default function Table ({
 		</table>
 	);
 }
-
-Table.timestamp = d => (new Date(d)).toLocaleString(void 0, {
-	dateStyle: 'short',
-	timeStyle: 'short',
-});
-
-Table.link = (href, overrideValue) => (value, row) => <A href={typeof href === 'function' ? href(value, row) : href}>{overrideValue ?? value}</A>;
-
-Table.capitalize = value => capitalize(value, true);
