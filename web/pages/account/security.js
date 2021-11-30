@@ -3,7 +3,7 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Form from '../../components/Form';
 import { useState } from 'react';
-import Notice from '../../components/Error';
+import Notice from '../../components/Notice';
 import { gql, useMutation } from 'urql';
 import e from '../../util/e';
 

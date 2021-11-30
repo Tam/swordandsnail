@@ -3,7 +3,7 @@ import Input from '../components/Input';
 import Button from '../components/Button';
 import A from '../components/A';
 import { useState } from 'react';
-import Notice from '../components/Error';
+import Notice from '../components/Notice';
 
 export default function Forgot () {
 	const [sent, setSent] = useState(false);

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import TextPreview from '../../components/TextPreview';
 import Button from '../../components/Button';
 import Form from '../../components/Form';
-import Notice from '../../components/Error';
+import Notice from '../../components/Notice';
 import e from '../../util/e';
 import ThemePreview from '../../components/ThemePreview';
 

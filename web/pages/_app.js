@@ -7,14 +7,11 @@ import Header from '../components/Header';
 import PreferencesHook from '../components/PreferencesHook';
 import { useRouter } from 'next/router';
 import Footer from '../components/Footer';
+import App from 'next/app';
 
 function MyApp ({ Component, pageProps }) {
-	const router = useRouter();
-	const client = useCreateClient({
-		defaultPostLoginRedirect: '/games',
-		unprotectedRoutes: ['/signin', '/forgot', '/reset', '/signup'],
-		agnosticRoutes: ['/', '/400', '/500', '/_error'],
-	});
+	const router = useRouter()
+		, client = useCreateClient();
 
 	return (
 		<Provider value={client}>
@@ -30,5 +27,12 @@ function MyApp ({ Component, pageProps }) {
 		</Provider>
 	);
 }
+
+MyApp.getInitialProps = async ctx => {
+	if (!process.browser)
+		SessionData.isLoggedIn = !!ctx?.ctx?.req?.cookies?.['snail.ssrid'];
+
+	return await App.getInitialProps(ctx);
+};
 
 export default MyApp;

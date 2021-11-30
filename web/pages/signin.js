@@ -2,16 +2,15 @@ import Input from '../components/Input';
 import AuthForm from '../components/AuthForm';
 import Button from '../components/Button';
 import A from '../components/A';
-import Notice from '../components/Error';
+import Notice from '../components/Notice';
 import { gql, useClient, useMutation } from 'urql';
-import { SessionData } from '../lib/client';
 import { useRouter } from 'next/router';
-import Cookies from 'js-cookie';
+import postLoginAction from '../util/postLoginAction';
 
 export default function Home () {
-	const router = useRouter();
+	const router = useRouter()
+		, client = useClient();
 
-	const client = useClient();
 	const [{ data, fetching }, login] = useMutation(gql`
 		mutation Login (
 			$email: String!
@@ -30,19 +29,8 @@ export default function Home () {
 			password,
 		});
 
-		if (data?.authenticate) {
-			const { data } = await client.mutation(gql`
-                mutation CheckAuth { 
-	                requestSsrid (input: {}) { 
-		                string 
-	                }
-                }
-			`).toPromise();
-
-			Cookies.set('snail.ssrid', data?.requestSsrid?.string, { secure: true, sameSite: 'strict' });
-			SessionData.isLoggedIn = true;
-			await router.push('/games');
-		}
+		if (data?.authenticate)
+			await postLoginAction(client, router);
 	};
 
 	return (

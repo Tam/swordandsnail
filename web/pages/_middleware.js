@@ -1,13 +1,38 @@
 import { NextResponse } from 'next/server';
 import { URI } from '../lib/consts';
 
+const LOGIN_URL = '/signin'
+	, POST_LOGIN_URL = '/games';
+
+const UNAUTHED_URLS = [
+	'/signin',
+	'/signup',
+	'/forgot',
+	'/reset',
+];
+
+const AGNOSTIC_URLS = [
+	'/',
+	'/400',
+	'/500',
+	'/_error',
+];
+
 export async function middleware (req) {
-	const res = NextResponse.next();
 	const ssrid = req.cookies['snail.ssrid'];
 
-	if (!ssrid)
-		return res;
+	const isProtectedUrl = UNAUTHED_URLS.indexOf(req.url) === -1 && AGNOSTIC_URLS.indexOf(req.url) === -1
+		, isUnauthedUrl = UNAUTHED_URLS.indexOf(req.url) !== -1;
 
+	// If we don't have an SSRID
+	if (!ssrid) {
+		if (isProtectedUrl)
+			return NextResponse.redirect(LOGIN_URL);
+
+		return NextResponse.next();
+	}
+
+	// Verify the SSRID
 	const resp = await fetch(URI, {
 		method: 'POST',
 		body: JSON.stringify({
@@ -16,11 +41,20 @@ export async function middleware (req) {
 			variables: { id: ssrid },
 		}),
 		headers: { 'Content-Type': 'application/json' },
-	}).then(res => res.json());
+	}).then(r => r.json());
 
+	// If verification failed
 	if (!resp?.data?.verifySsrid) {
+		let res;
+		if (isProtectedUrl) res = NextResponse.redirect(LOGIN_URL)
+		else if (isUnauthedUrl) res = NextResponse.redirect(POST_LOGIN_URL)
+		else res = NextResponse.next();
+
+		// Clear the SSRID cookie
 		res.cookie('snail.ssrid', '', { maxAge: 0, secure: true, httpOnly: true });
+
+		return res;
 	}
 
-	return res;
+	return NextResponse.next();
 }

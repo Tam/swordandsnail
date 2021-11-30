@@ -4,7 +4,7 @@ import Input from '../../components/Input';
 import { gql, useMutation, useQuery } from 'urql';
 import Button from '../../components/Button';
 import { useState } from 'react';
-import Notice from '../../components/Error';
+import Notice from '../../components/Notice';
 
 export default function Account () {
 	const [success, setSuccess] = useState(false);
