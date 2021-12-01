@@ -1,13 +1,21 @@
 import css from './style.module.scss';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+const normalizeText = html => html
+	.replace(/<(div|p)>/g, '')
+	.replace(/<br\/?><\/(div|p)>/g, '\n')
+	.replace(/<\/(div|p)>/g, '\n');
 
 export default function Markdown () {
 	const input = useRef();
+	const [value, setValue] = useState('');
 
 	useEffect(() => {
 		if (!input.current) return;
 
 		const el = input.current;
+
+		const onInput = e => setValue(normalizeText(e.target.innerHTML));
 
 		const onPaste = e => {
 			e.preventDefault();
@@ -35,17 +43,27 @@ export default function Markdown () {
 			'    Is it the best solution?\n' +
 			'    Is it bulletproof to avoid any HTML markup in paste?\n' +
 			'    How to add listener to Right Click -> Paste?';
+		setValue(normalizeText(el.innerHTML));
+		el.addEventListener('input', onInput);
 
 		return () => {
 			el.removeEventListener('paste', onPaste);
+			el.removeEventListener('input', onInput);
 		};
 	}, [input]);
 
 	return (
-		<div
-			className={css.md}
-			ref={input}
-			contentEditable
-		/>
+		<>
+			<div
+				className={css.md}
+				ref={input}
+				contentEditable
+			/>
+			<hr/>
+			<pre
+				style={{whiteSpace:'pre-wrap'}}
+				dangerouslySetInnerHTML={{__html:value.replace(/\*\*(.*)\*\*/g, '<strong>**$1**</strong>')}}
+			/>
+		</>
 	);
 }

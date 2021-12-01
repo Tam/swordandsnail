@@ -9,6 +9,11 @@ import { useRouter } from 'next/router';
 import Footer from '../components/Footer';
 import App from 'next/app';
 
+if (!String.prototype.replaceAll)
+	String.prototype.replaceAll = function (find, replace) {
+		return this.replace(new RegExp(find, 'g'), replace);
+	};
+
 function MyApp ({ Component, pageProps }) {
 	const router = useRouter()
 		, client = useCreateClient();
