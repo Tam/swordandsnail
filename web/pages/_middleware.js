@@ -19,6 +19,7 @@ const AGNOSTIC_URLS = [
 ];
 
 export async function middleware (req) {
+	console.log(process.env.NEXT_PUBLIC_API);
 	const ssrid = req.cookies['snail.ssrid'];
 
 	const isProtectedUrl = UNAUTHED_URLS.indexOf(req.url) === -1 && AGNOSTIC_URLS.indexOf(req.url) === -1
