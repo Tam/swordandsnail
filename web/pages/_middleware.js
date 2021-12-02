@@ -19,46 +19,42 @@ const AGNOSTIC_URLS = [
 ];
 
 export async function middleware (req) {
-	try {
-		const ssrid = req.cookies['snail.ssrid'];
+	// const ssrid = req.cookies['snail.ssrid'];
+	//
+	// const isProtectedUrl = UNAUTHED_URLS.indexOf(req.url) === -1 && AGNOSTIC_URLS.indexOf(req.url) === -1
+	// 	, isUnauthedUrl = UNAUTHED_URLS.indexOf(req.url) !== -1;
+	//
+	// // If we don't have an SSRID
+	// if (!ssrid) {
+	// 	if (isProtectedUrl)
+	// 		return NextResponse.redirect(LOGIN_URL);
+	//
+	// 	return NextResponse.next();
+	// }
+	//
+	// // Verify the SSRID
+	// const resp = await fetch(URI, {
+	// 	method: 'POST',
+	// 	body: JSON.stringify({
+	// 		operationName: 'VerifySSRID',
+	// 		query: 'query VerifySSRID ($id: String!) { verifySsrid(ssrid: $id) }',
+	// 		variables: { id: ssrid },
+	// 	}),
+	// 	headers: { 'Content-Type': 'application/json' },
+	// }).then(r => r.json());
+	//
+	// // If verification failed
+	// if (!resp?.data?.verifySsrid) {
+	// 	let res;
+	// 	if (isProtectedUrl) res = NextResponse.redirect(LOGIN_URL)
+	// 	else if (isUnauthedUrl) res = NextResponse.redirect(POST_LOGIN_URL)
+	// 	else res = NextResponse.next();
+	//
+	// 	// Clear the SSRID cookie
+	// 	res.cookie('snail.ssrid', '', { maxAge: 0, secure: true, httpOnly: true });
+	//
+	// 	return res;
+	// }
 
-		const isProtectedUrl = UNAUTHED_URLS.indexOf(req.url) === -1 && AGNOSTIC_URLS.indexOf(req.url) === -1
-			, isUnauthedUrl = UNAUTHED_URLS.indexOf(req.url) !== -1;
-
-		// If we don't have an SSRID
-		if (!ssrid) {
-			if (isProtectedUrl)
-				return NextResponse.redirect(LOGIN_URL);
-
-			return NextResponse.next();
-		}
-
-		// Verify the SSRID
-		const resp = await fetch(URI, {
-			method: 'POST',
-			body: JSON.stringify({
-				operationName: 'VerifySSRID',
-				query: 'query VerifySSRID ($id: String!) { verifySsrid(ssrid: $id) }',
-				variables: { id: ssrid },
-			}),
-			headers: { 'Content-Type': 'application/json' },
-		}).then(r => r.json());
-
-		// If verification failed
-		if (!resp?.data?.verifySsrid) {
-			let res;
-			if (isProtectedUrl) res = NextResponse.redirect(LOGIN_URL)
-			else if (isUnauthedUrl) res = NextResponse.redirect(POST_LOGIN_URL)
-			else res = NextResponse.next();
-
-			// Clear the SSRID cookie
-			res.cookie('snail.ssrid', '', { maxAge: 0, secure: true, httpOnly: true });
-
-			return res;
-		}
-
-		return NextResponse.next();
-	} catch (e) {
-		console.trace(e);
-	}
+	return NextResponse.next();
 }
