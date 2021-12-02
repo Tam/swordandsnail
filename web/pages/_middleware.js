@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { URI } from '../lib/consts';
+// import { NextResponse } from 'next/server';
+// import { URI } from '../lib/consts';
 
 const LOGIN_URL = '/signin'
 	, POST_LOGIN_URL = '/games';
