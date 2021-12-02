@@ -1,22 +1,22 @@
 // import { NextResponse } from 'next/server';
 // import { URI } from '../lib/consts';
 
-const LOGIN_URL = '/signin'
-	, POST_LOGIN_URL = '/games';
-
-const UNAUTHED_URLS = [
-	'/signin',
-	'/signup',
-	'/forgot',
-	'/reset',
-];
-
-const AGNOSTIC_URLS = [
-	'/',
-	'/400',
-	'/500',
-	'/_error',
-];
+// const LOGIN_URL = '/signin'
+// 	, POST_LOGIN_URL = '/games';
+//
+// const UNAUTHED_URLS = [
+// 	'/signin',
+// 	'/signup',
+// 	'/forgot',
+// 	'/reset',
+// ];
+//
+// const AGNOSTIC_URLS = [
+// 	'/',
+// 	'/400',
+// 	'/500',
+// 	'/_error',
+// ];
 
 export async function middleware (req) {
 	return new Response('hi');
