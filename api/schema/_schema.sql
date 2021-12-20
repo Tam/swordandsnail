@@ -71,18 +71,19 @@ end $$;
 -- SQL
 -- =============================================================================
 
-\i public.user.sql
-\i public.account.sql
-\i public.preferences.sql
-\i private.session.sql
-\i public.is_authenticated.sql
-\i public.request_ssrid.sql
-\i public.verify_ssrid.sql
-\i public.viewer.sql
-\i private.register.sql
-\i private.authenticate.sql
-\i public.update_password.sql
-\i private.validate_security_stamp.sql
+\echo 'public.user.sql' \i public.user.sql
+\echo 'public.account.sql' \i public.account.sql
+\echo 'public.preferences.sql' \i public.preferences.sql
+\echo 'private.session.sql' \i private.session.sql
+\echo 'public.is_authenticated.sql' \i public.is_authenticated.sql
+\echo 'public.request_ssrid.sql' \i public.request_ssrid.sql
+\echo 'public.verify_ssrid.sql' \i public.verify_ssrid.sql
+\echo 'public.viewer.sql' \i public.viewer.sql
+\echo 'private.register.sql' \i private.register.sql
+\echo 'private.authenticate.sql' \i private.authenticate.sql
+\echo 'public.update_password.sql' \i public.update_password.sql
+\echo 'private.validate_security_stamp.sql' \i private.validate_security_stamp.sql
+\echo 'private.password_reset.sql' \i private.password_reset.sql
 
 -- Drop Helpers
 -- =============================================================================
