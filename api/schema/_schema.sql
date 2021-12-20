@@ -84,6 +84,7 @@ end $$;
 \echo 'public.update_password.sql' \i public.update_password.sql
 \echo 'private.validate_security_stamp.sql' \i private.validate_security_stamp.sql
 \echo 'private.password_reset.sql' \i private.password_reset.sql
+\echo 'public.request_password_reset.sql' \i public.request_password_reset.sql
 
 -- Drop Helpers
 -- =============================================================================
