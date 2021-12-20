@@ -13,7 +13,7 @@ create or replace function util.send_email (
   meta json
 ) returns void as $$
   select graphile_worker.add_job(
-    'email-send-templated',
+    'send-email',
     json_build_object(
       'to', recipient,
       'template', template,

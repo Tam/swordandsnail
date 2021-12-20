@@ -8,6 +8,7 @@ create table if not exists private.password_reset (
 
 create or replace function private.on_before_insert_password_reset () returns trigger as $$
 begin
+  -- Purge existing reset requests
   delete from private.password_reset
   where user_id = new.user_id;
 

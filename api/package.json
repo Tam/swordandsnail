@@ -9,6 +9,7 @@
     "graphql": "^16.0.1",
     "pg": "^8.7.1",
     "postgraphile": "^4.12.5",
-    "postgraphile-plugin-connection-filter": "^2.2.2"
+    "postgraphile-plugin-connection-filter": "^2.2.2",
+    "postmark": "^2.7.8"
   }
 }
