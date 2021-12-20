@@ -30,7 +30,7 @@ help:
 .PHONY: migrate
 migrate: ## Migrate SQL Schema ([file=abc])
 	@echo "$(grey)Migrating schema...$(blank)"
-	@docker-compose exec -T $(PGHOST) psql --quiet -U $(PGUSER) -d $(PGDATABASE) < schema.sql
+	@docker-compose exec -T -w /schema $(PGHOST) psql --quiet -U $(PGUSER) -d $(PGDATABASE) < schema/_schema.sql
 	@echo "$(green)Migration complete (hopefully)!$(blank)"
 
 .PHONY: backup

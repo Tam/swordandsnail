@@ -28,6 +28,7 @@ services:
     volumes:
       - ./.docker/postgresql.conf:/etc/postgresql.conf:delegated
       - ./.data/db:/var/lib/postgresql/data:delegated
+      - ./schema:/schema:delegated
     environment:
       - POSTGRES_DB=${PGDATABASE}
       - POSTGRES_USER=${PGUSER}

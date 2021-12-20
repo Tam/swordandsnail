@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { URI } from '../lib/consts';
 
-const LOGIN_URL = '/signin'
-	, POST_LOGIN_URL = '/games';
+const LOGIN_URL = '/signin';
 
 const PUBLIC_URLS = [
 	'/signin',
