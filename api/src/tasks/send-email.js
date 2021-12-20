@@ -14,6 +14,6 @@ module.exports = async payload => {
 		'To': to,
 		'TemplateAlias': template,
 		'TemplateModel': meta,
-		'MessageStream': process.env.NODE_ENV === 'production' ? 'production' : 'staging',
+		'MessageStream': process.env.NODE_ENV === 'production' ? 'outbound' : 'staging',
 	});
 };

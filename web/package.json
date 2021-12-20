@@ -10,6 +10,7 @@
   "dependencies": {
     "@urql/exchange-auth": "^0.1.6",
     "@urql/exchange-retry": "^0.3.0",
+    "bowser": "^2.11.0",
     "graphql": "^16.0.1",
     "isomorphic-unfetch": "^3.1.0",
     "js-cookie": "^3.0.1",
