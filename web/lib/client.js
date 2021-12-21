@@ -2,11 +2,6 @@ import { authExchange } from '@urql/exchange-auth';
 import { retryExchange } from '@urql/exchange-retry';
 import { cacheExchange, dedupExchange, fetchExchange, createClient as _createClient } from 'urql';
 import { URI } from './consts';
-import Cookies from 'js-cookie';
-
-export const SessionData = {
-	isLoggedIn: !!Cookies.get('snail.ssrid'),
-};
 
 export const clientOpts = {
 	url: URI,
@@ -28,7 +23,7 @@ export const clientOpts = {
 			},
 
 			willAuthError () {
-				return SessionData.isLoggedIn === false;
+				return false;
 			},
 		}),
 		retryExchange({}),

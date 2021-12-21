@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { URI } from '../lib/consts';
 
-const LOGIN_URL = '/signin';
+const LOGIN_URL = '/signin'
+	, POST_LOGIN_URL = '/games';
 
 const PUBLIC_URLS = [
 	'/signin',
@@ -18,43 +19,51 @@ const AGNOSTIC_URLS = [
 ];
 
 export async function middleware (req) {
-	const ssrid = req.cookies['snail.ssrid'];
+	const sid = req.cookies['snails.satchel'];
+	const url = new URL(req.url);
 
-	const isProtectedUrl = PUBLIC_URLS.indexOf(req.url) === -1 && AGNOSTIC_URLS.indexOf(req.url) === -1;
+	const isPublicUrl = PUBLIC_URLS.indexOf(url.pathname) > -1;
+	const isProtectedUrl = PUBLIC_URLS.indexOf(url.pathname) === -1 && AGNOSTIC_URLS.indexOf(url.pathname) === -1;
 
-	// If we don't have an SSRID
-	if (!ssrid) {
+	if (!sid) {
+		const resp = await fetch(URI.replace('graphql', 'session'), {
+			method: 'GET',
+			credentials: 'include',
+		});
+
 		if (isProtectedUrl) {
 			const res = NextResponse.redirect(LOGIN_URL);
-			res.cookie('snail.post_login', req.url, { secure: true, httpOnly: true });
+			res.cookie('snail.post_login', url.pathname, { secure: true, httpOnly: true });
+			res.headers.set('Set-Cookie', resp.headers.get('Set-Cookie'));
 			return res;
 		}
 
-		return NextResponse.next();
+		const res = NextResponse.next();
+		res.headers.set('Set-Cookie', resp.headers.get('Set-Cookie'));
+
+		return res;
 	}
 
-	// Verify the SSRID
 	const resp = await fetch(URI, {
 		method: 'POST',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+			'cookie': req.headers.get('cookie'),
+		},
 		body: JSON.stringify({
-			operationName: 'VerifySSRID',
-			query: 'query VerifySSRID ($id: String!) { verifySsrid(ssrid: $id) }',
-			variables: { id: ssrid },
+			operationName: 'Viewer',
+			query: 'query Viewer { viewer { id } }',
 		}),
-		headers: { 'Content-Type': 'application/json' },
 	}).then(r => r.json());
 
-	// If verification failed
-	if (!resp?.data?.verifySsrid) {
+	if (!resp?.data?.viewer) {
 		let res;
 		if (isProtectedUrl) {
 			res = NextResponse.redirect(LOGIN_URL);
-			res.cookie('snail.post_login', req.url, { secure: true, httpOnly: true });
+			res.cookie('snail.post_login', url.pathname, { secure: true, httpOnly: true });
 		}
 		else res = NextResponse.next();
-
-		// Clear the SSRID cookie
-		res.cookie('snail.ssrid', '', { maxAge: 0, secure: true, httpOnly: true });
 
 		return res;
 	}
@@ -67,6 +76,9 @@ export async function middleware (req) {
 
 		return res;
 	}
+
+	if (isPublicUrl)
+		return NextResponse.redirect(POST_LOGIN_URL);
 
 	return NextResponse.next();
 }

@@ -52,6 +52,7 @@ const postgraphileOptions = dbPool => ({
 	appendPlugins: [
 		require('@graphile-contrib/pg-simplify-inflector'),
 		require('postgraphile-plugin-connection-filter'),
+		require('../plugins/ping'),
 		require('../plugins/auth'),
 		require('../plugins/primary-key-mutations-only'),
 		require('../plugins/throw-warnings'),

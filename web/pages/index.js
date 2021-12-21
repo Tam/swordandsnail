@@ -1,10 +1,13 @@
 import A from '../components/A';
-import { SessionData } from '../lib/client';
+import { useContext } from 'react';
+import SessionContext from '../contexts/SessionContext';
 
 export default function Index () {
+	const [{ isLoggedIn }] = useContext(SessionContext);
+
 	return (
 		<>
-			{SessionData.isLoggedIn ? (
+			{isLoggedIn ? (
 				<p><A href="/games">Games</A></p>
 			) : (
 				<>
