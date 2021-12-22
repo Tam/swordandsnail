@@ -1,5 +1,4 @@
 import '../styles/globals.scss';
-import useCreateClient from '../hooks/useCreateClient';
 import Head from 'next/head';
 import { Provider } from 'urql';
 import Header from '../components/Header';
@@ -9,21 +8,24 @@ import Footer from '../components/Footer';
 import App from 'next/app';
 import SessionContext from '../contexts/SessionContext';
 import { useState } from 'react';
+import withSsr from '../hoc/withSsr';
 
 if (!String.prototype.replaceAll)
 	String.prototype.replaceAll = function (find, replace) {
 		return this.replace(new RegExp(find, 'g'), replace);
 	};
 
-function MyApp ({ Component, pageProps, isLoggedIn }) {
-	const router = useRouter()
-		, client = useCreateClient();
+function MyApp ({ Component, pageProps, isLoggedIn, urqlClient }) {
+	// TODO: Work out why we have an initial state, but the client isn't being hydrated with it
+	console.log(pageProps?.urqlState);
+
+	const router = useRouter();
 
 	const [session, setSession] = useState({ isLoggedIn });
 
 	return (
 		<SessionContext.Provider value={[session, setSession]}>
-			<Provider value={client}>
+			<Provider value={urqlClient}>
 				<PreferencesHook />
 				<Head>
 					{process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production' && <meta name="robots" content="noindex" />}
@@ -47,4 +49,4 @@ MyApp.getInitialProps = async ctx => {
 	return props;
 };
 
-export default MyApp;
+export default withSsr(MyApp);

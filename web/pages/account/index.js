@@ -5,8 +5,9 @@ import { gql, useMutation, useQuery } from 'urql';
 import Button from '../../components/Button';
 import { useState } from 'react';
 import Notice from '../../components/Notice';
+import withSsr from '../../hoc/withSsr';
 
-export default function Account () {
+function Account () {
 	const [success, setSuccess] = useState(false);
 
 	const [{ data, fetching }] = useQuery({
@@ -20,8 +21,10 @@ export default function Account () {
 					}
 				}
 			}
-		`
+		`,
 	});
+
+	console.log(process.browser, fetching, data);
 
 	const [{ fetching: saving }, save] = useMutation(gql`
 		mutation SaveProfile (
@@ -85,3 +88,5 @@ export default function Account () {
 		</AccountLayout>
 	);
 }
+
+export default withSsr(Account)

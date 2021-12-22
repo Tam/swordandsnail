@@ -3,7 +3,7 @@ import { retryExchange } from '@urql/exchange-retry';
 import { cacheExchange, dedupExchange, fetchExchange, createClient as _createClient } from 'urql';
 import { URI } from './consts';
 
-export const clientOpts = {
+export const clientOpts = (ssrExchange, ctx) => ({
 	url: URI,
 	exchanges: [
 		dedupExchange,
@@ -18,7 +18,7 @@ export const clientOpts = {
 			},
 
 			didAuthError ({ error }) {
-				const { status } = error.response;
+				const status = error?.response?.status;
 				return status === 401 || status === 403;
 			},
 
@@ -26,14 +26,19 @@ export const clientOpts = {
 				return false;
 			},
 		}),
+		ssrExchange,
 		retryExchange({}),
 		fetchExchange,
 	].filter(Boolean),
 	fetchOptions: {
 		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+			'cookie': ctx?.req?.headers?.cookie,
+		},
 	},
-};
+});
 
 export default function createClient () {
-	return _createClient(clientOpts);
+	return _createClient(clientOpts());
 };

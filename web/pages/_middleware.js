@@ -18,6 +18,11 @@ const AGNOSTIC_URLS = [
 	'/_error',
 ];
 
+const ROLE_PROTECTED_URLS = {
+	'/admin': ['ADMIN'],
+	'/studio': ['ADMIN', 'DESIGNER'],
+};
+
 export async function middleware (req) {
 	const sid = req.cookies['snails.satchel'];
 	const url = new URL(req.url);
@@ -53,17 +58,17 @@ export async function middleware (req) {
 		},
 		body: JSON.stringify({
 			operationName: 'Viewer',
-			query: 'query Viewer { viewer { id } }',
+			query: 'query Viewer { viewer { account { role } } }',
 		}),
 	}).then(r => r.json());
 
 	if (!resp?.data?.viewer) {
-		let res;
+		let res = NextResponse.next();
+
 		if (isProtectedUrl) {
 			res = NextResponse.redirect(LOGIN_URL);
 			res.cookie('snail.post_login', url.pathname, { secure: true, httpOnly: true });
 		}
-		else res = NextResponse.next();
 
 		return res;
 	}
@@ -79,6 +84,15 @@ export async function middleware (req) {
 
 	if (isPublicUrl)
 		return NextResponse.redirect(POST_LOGIN_URL);
+
+	const role = resp?.data?.viewer?.account?.role;
+
+	if (!role)
+		return NextResponse.rewrite('/404');
+
+	for (let [path, roles] of Object.entries(ROLE_PROTECTED_URLS))
+		if (url.pathname.startsWith(path) && roles.indexOf(role) === -1)
+			return NextResponse.rewrite('/404');
 
 	return NextResponse.next();
 }

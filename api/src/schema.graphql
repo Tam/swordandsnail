@@ -420,7 +420,6 @@ type Query implements Node {
     """The method to use when ordering `User`."""
     orderBy: [UsersOrderBy!]
   ): [User!]
-  verifySsrid(ssrid: String!): String
   viewer: User
 }
 
