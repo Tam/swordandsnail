@@ -1,15 +1,16 @@
 import css from './style.module.scss';
 import A from '../A';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import Button from '../Button';
 import { useRouter } from 'next/router';
 import { gql, useMutation, useQuery } from 'urql';
-import { SessionData } from '../../lib/client';
+import SessionContext from '../../contexts/SessionContext';
 
 export default function Header () {
-	const router = useRouter();
-	const menu = useRef();
-	const [menuOpen, setMenuOpen] = useState(false);
+	const router = useRouter()
+		, menu = useRef()
+		, [, setSession] = useContext(SessionContext)
+		, [menuOpen, setMenuOpen] = useState(false);
 
 	const [{ data }] = useQuery({
 		query: gql`
@@ -54,7 +55,7 @@ export default function Header () {
 	};
 
 	const onLogoutClick = async () => {
-		SessionData.isLoggedIn = false;
+		setSession(p => ({ ...p, isLoggedIn: false }));
 		await logout();
 		await router.push('/');
 	};

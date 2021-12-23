@@ -61,8 +61,8 @@ module.exports = makeExtendSchemaPlugin(() => ({
 				}
 			},
 
-			async logout (_, __, { delSession }) {
-				delSession();
+			async logout (_, __, { setSession }) {
+				await setSession('user_id', '');
 
 				return true;
 			},

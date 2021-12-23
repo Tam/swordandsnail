@@ -3,13 +3,15 @@ import AuthForm from '../components/AuthForm';
 import Button from '../components/Button';
 import A from '../components/A';
 import Notice from '../components/Notice';
-import { gql, useClient, useMutation } from 'urql';
+import { gql, useMutation } from 'urql';
 import { useRouter } from 'next/router';
 import postLoginAction from '../util/postLoginAction';
+import { useContext } from 'react';
+import SessionContext from '../contexts/SessionContext';
 
 export default function Home () {
 	const router = useRouter()
-		, client = useClient();
+		, [, setSession] = useContext(SessionContext);
 
 	const [{ data, fetching }, login] = useMutation(gql`
 		mutation Login (
@@ -30,7 +32,7 @@ export default function Home () {
 		});
 
 		if (data?.authenticate)
-			await postLoginAction(client, router);
+			await postLoginAction(setSession, router);
 	};
 
 	return (

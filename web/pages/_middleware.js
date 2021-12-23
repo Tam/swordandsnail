@@ -74,7 +74,9 @@ export async function middleware (req) {
 			operationName: 'Viewer',
 			query: 'query Viewer { viewer { account { role } } }',
 		}),
-	}).then(r => r.json());
+	})
+		.then(r => r.json())
+		.catch(() => void 0);
 
 	if (!resp?.data?.viewer) {
 		let res = NextResponse.next();
@@ -82,6 +84,7 @@ export async function middleware (req) {
 		if (isProtectedUrl) {
 			res = NextResponse.redirect(LOGIN_URL);
 			res.cookie('snail.post_login', url.pathname, { secure: true, httpOnly: true });
+			res.cookie('snail.logged_in', '', { maxAge: 0, secure: true, httpOnly: false });
 		}
 
 		return res;
@@ -92,12 +95,17 @@ export async function middleware (req) {
 	if (postLoginRedirect) {
 		const res = NextResponse.redirect(postLoginRedirect);
 		res.cookie('snail.post_login', '', { maxAge: 0, secure: true, httpOnly: true });
+		res.cookie('snail.logged_in', '1', { secure: true, httpOnly: false });
 
 		return res;
 	}
 
-	if (isPublicUrl)
-		return NextResponse.redirect(POST_LOGIN_URL);
+	if (isPublicUrl) {
+		const res = NextResponse.redirect(POST_LOGIN_URL);
+		res.cookie('snail.logged_in', '1', { secure: true, httpOnly: false });
+
+		return res;
+	}
 
 	const role = resp?.data?.viewer?.account?.role;
 
@@ -108,5 +116,8 @@ export async function middleware (req) {
 		if (url.pathname.startsWith(path) && roles.indexOf(role) === -1)
 			return NextResponse.rewrite('/404');
 
-	return NextResponse.next();
+	const res = NextResponse.next();
+	res.cookie('snail.logged_in', '1', { secure: true, httpOnly: false });
+
+	return res;
 }

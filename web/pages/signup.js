@@ -1,15 +1,17 @@
 import AuthForm from '../components/AuthForm';
 import Input from '../components/Input';
 import Button from '../components/Button';
-import { gql, useClient, useMutation } from 'urql';
+import { gql, useMutation } from 'urql';
 import Notice from '../components/Notice';
 import e from '../util/e';
 import { useRouter } from 'next/router';
 import postLoginAction from '../util/postLoginAction';
+import { useContext } from 'react';
+import SessionContext from '../contexts/SessionContext';
 
 export default function SignUp () {
 	const router = useRouter()
-		, client = useClient();
+		, [, setSession] = useContext(SessionContext);
 
 	const [{ error, fetching }, register] = useMutation(gql`
 		mutation Register (
@@ -29,7 +31,7 @@ export default function SignUp () {
 		const { data } = await register(variables);
 
 		if (data?.register)
-			await postLoginAction(client, router);
+			await postLoginAction(setSession, router);
 	};
 
 	return (
