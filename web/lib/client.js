@@ -8,6 +8,7 @@ export const clientOpts = (ssrExchange, ctx) => ({
 	exchanges: [
 		dedupExchange,
 		cacheExchange,
+		ssrExchange,
 		authExchange({
 			async getAuth () {
 				return null;
@@ -26,7 +27,6 @@ export const clientOpts = (ssrExchange, ctx) => ({
 				return false;
 			},
 		}),
-		ssrExchange,
 		retryExchange({}),
 		fetchExchange,
 	].filter(Boolean),
