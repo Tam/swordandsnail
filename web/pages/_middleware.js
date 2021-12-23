@@ -27,13 +27,28 @@ export async function middleware (req) {
 	const sid = req.cookies['snails.satchel'];
 	const url = new URL(req.url);
 
+	{
+		// TODO: Cache this
+		const resp = await fetch(URI, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				operationName: 'GetPages',
+				query: 'query GetPages { pagesList { slug } }',
+			}),
+		}).then(r => r.json());
+
+		resp?.data?.pagesList?.map(p => AGNOSTIC_URLS.push(`/${p.slug}`));
+	}
+
 	const isPublicUrl = PUBLIC_URLS.indexOf(url.pathname) > -1;
 	const isProtectedUrl = PUBLIC_URLS.indexOf(url.pathname) === -1 && AGNOSTIC_URLS.indexOf(url.pathname) === -1;
 
 	if (!sid) {
 		const resp = await fetch(URI.replace('graphql', 'session'), {
 			method: 'GET',
-			//credentials: 'include',
 		});
 
 		if (isProtectedUrl) {
@@ -51,7 +66,6 @@ export async function middleware (req) {
 
 	const resp = await fetch(URI, {
 		method: 'POST',
-		//credentials: 'include',
 		headers: {
 			'Content-Type': 'application/json',
 			'cookie': req.headers.get('cookie'),

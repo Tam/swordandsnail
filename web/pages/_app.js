@@ -2,7 +2,6 @@ import '../styles/globals.scss';
 import Head from 'next/head';
 import Header from '../components/Header';
 import PreferencesHook from '../components/PreferencesHook';
-import { useRouter } from 'next/router';
 import Footer from '../components/Footer';
 import App from 'next/app';
 import SessionContext from '../contexts/SessionContext';
@@ -15,8 +14,6 @@ if (!String.prototype.replaceAll)
 	};
 
 function MyApp ({ Component, pageProps, isLoggedIn }) {
-	const router = useRouter();
-
 	const [session, setSession] = useState({ isLoggedIn });
 
 	return (
@@ -27,7 +24,7 @@ function MyApp ({ Component, pageProps, isLoggedIn }) {
 				<title>Sword & Snail</title>
 				<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐌</text></svg>" />
 			</Head>
-			{session.isLoggedIn && router.pathname !== '/' && <Header />}
+			{session.isLoggedIn && <Header />}
 			<main><Component {...pageProps} /></main>
 			<Footer />
 		</SessionContext.Provider>
@@ -37,6 +34,7 @@ function MyApp ({ Component, pageProps, isLoggedIn }) {
 MyApp.getInitialProps = async ctx => {
 	const props = await App.getInitialProps(ctx);
 
+	// TODO: Having a session token != logged in
 	if (!process.browser)
 		props.isLoggedIn = !!ctx?.ctx?.req?.cookies?.['snails.satchel'];
 
