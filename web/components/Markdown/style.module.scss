@@ -1,6 +1,62 @@
 @import "../../styles/variables";
 
-.md {
+.wrap {
+	display: block;
+
+	&:not(:last-child) {
+		margin-bottom: size(24);
+	}
+}
+
+.label {
+	display: flex;
+	align-items: stretch;
+	margin-top: size(4);
+	padding: size(7) size(12);
+
+	border: 2px solid $text-color;
+
+	&:hover {
+		outline: size(1) solid $text-color;
+	}
+
+	.focus & {
+		outline: size(2) solid $text-color;
+	}
+
+	hr {
+		position: relative;
+		margin: size(12);
+		width: size(4);
+		min-height: size(50);
+
+		&::after {
+			position: absolute;
+			top: 50%;
+
+			width: size(4);
+			height: size(50);
+
+			transform: translateY(-50%);
+		}
+	}
+
+	div {
+		width: 50%;
+	}
+}
+
+.input {
+	width: 50%;
+
+	color: currentColor;
 	line-height: 1.7em;
-	white-space: pre-wrap;
+
+	appearance: none;
+	background: none;
+	border: none;
+	border-radius: 0;
+	resize: none;
+	outline: none;
+	box-shadow: none;
 }

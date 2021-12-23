@@ -1,5 +1,6 @@
 import css from './style.module.scss';
 import cls from '../../util/cls';
+import A from '../A';
 
 export default function Button ({
 	type = 'button',
@@ -7,17 +8,21 @@ export default function Button ({
 	disabled = false,
 	wide = false,
 	children,
+	href,
 }) {
+	const El = href ? A : 'button';
+
 	return (
-		<button
+		<El
 			className={cls(css.button, {
 				[css.wide]: wide,
 			})}
 			type={type}
 			onClick={onClick}
 			disabled={disabled}
+			href={href}
 		>
 			{children}
-		</button>
+		</El>
 	);
 }

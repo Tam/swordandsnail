@@ -85,6 +85,7 @@ end $$;
 \echo 'private.validate_security_stamp.sql' \i private.validate_security_stamp.sql
 \echo 'private.password_reset.sql' \i private.password_reset.sql
 \echo 'public.request_password_reset.sql' \i public.request_password_reset.sql
+\echo 'public.page.sql' \i public.page.sql
 
 -- Drop Helpers
 -- =============================================================================

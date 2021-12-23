@@ -4,10 +4,11 @@ import A from '../A';
 import Title from '../Title';
 
 const NavLink = ({ href, children }) => {
-	const active = useRouter().pathname.endsWith(href || 'admin');
+	const url = `/admin/${href}`;
+	const active = useRouter().pathname[href === '' ? 'endsWith' : 'startsWith'](url.replace(/\/$/, ''));
 
 	return (
-		<li><A href={`/admin/${href}`}>{active ? '> ' : ''}{children}</A></li>
+		<li><A href={url}>{active ? '> ' : ''}{children}</A></li>
 	);
 };
 

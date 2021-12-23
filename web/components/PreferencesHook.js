@@ -9,6 +9,7 @@ export default function PreferencesHook () {
 		query: gql`
             query GetPreferences {
                 viewer {
+	                id
                     preference {
 	                    id: nodeId
                         font

@@ -15,11 +15,11 @@
 		padding-bottom: size($spacer);
 
 		border-bottom: 2px dotted $text-color;
-	}
 
-	a {
-		display: block;
-		padding: size(5) 0;
+		a {
+			display: block;
+			padding: size(5) 0;
+		}
 	}
 }
 

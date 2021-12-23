@@ -1,12 +1,14 @@
 import { authExchange } from '@urql/exchange-auth';
 import { retryExchange } from '@urql/exchange-retry';
 import { cacheExchange, dedupExchange, fetchExchange, createClient as _createClient } from 'urql';
+import { requestPolicyExchange } from '@urql/exchange-request-policy';
 import { URI } from './consts';
 
 export const clientOpts = (ssrExchange, ctx) => ({
 	url: URI,
 	exchanges: [
 		dedupExchange,
+		requestPolicyExchange({}),
 		cacheExchange,
 		ssrExchange,
 		authExchange({

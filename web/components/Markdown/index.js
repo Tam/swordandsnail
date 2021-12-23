@@ -1,69 +1,41 @@
 import css from './style.module.scss';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { parse } from 'marked';
+import cls from '../../util/cls';
 
-const normalizeText = html => html
-	.replace(/<(div|p)>/g, '')
-	.replace(/<br\/?><\/(div|p)>/g, '\n')
-	.replace(/<\/(div|p)>/g, '\n');
+export default function Markdown ({ name, label, defaultValue = '' }) {
+	const [value, setValue] = useState(defaultValue)
+		, [focus, setFocus] = useState(false);
 
-export default function Markdown () {
-	const input = useRef();
-	const [value, setValue] = useState('');
+	const onInput = e => {
+		let { borderTopWidth, borderBottomWidth } = window.getComputedStyle(e.target);
+		borderTopWidth = +borderTopWidth.replace(/[^\d.]/g, '');
+		borderBottomWidth = +borderBottomWidth.replace(/[^\d.]/g, '');
+		e.target.style.height = '';
+		e.target.style.height = (e.target.scrollHeight + borderTopWidth + borderBottomWidth) + 'px';
+	};
 
-	useEffect(() => {
-		if (!input.current) return;
-
-		const el = input.current;
-
-		const onInput = e => setValue(normalizeText(e.target.innerHTML));
-
-		const onPaste = e => {
-			e.preventDefault();
-			const paste = (e.clipboardData || window.clipboardData).getData('text/plain');
-			const selection = window.getSelection();
-
-			if (selection.rangeCount)
-				selection.deleteFromDocument();
-
-			document.execCommand('insertText', false, paste);
-		};
-
-		el.addEventListener('paste', onPaste);
-		el.textContent =
-			'I have a basic editor based on execCommand following the sample introduced here. There are three ways to paste text within the execCommand area:\n' +
-			'\n' +
-			'    Ctrl+V\n' +
-			'    Right Click -> Paste\n' +
-			'    Right Click -> Paste As Plain Text\n' +
-			'\n' +
-			'I want to allow pasting only plain text without any HTML markup. How can I force the first two actions to paste Plain Text?\n' +
-			'\n' +
-			'Possible Solution: The way I can think of is to set listener for keyup events for (Ctrl+V) and strip HTML tags before paste.\n' +
-			'\n' +
-			'    Is it the best solution?\n' +
-			'    Is it bulletproof to avoid any HTML markup in paste?\n' +
-			'    How to add listener to Right Click -> Paste?';
-		setValue(normalizeText(el.innerHTML));
-		el.addEventListener('input', onInput);
-
-		return () => {
-			el.removeEventListener('paste', onPaste);
-			el.removeEventListener('input', onInput);
-		};
-	}, [input]);
+	const onFocus = () => setFocus(true)
+		, onBlur  = () => setFocus(false);
 
 	return (
-		<>
-			<div
-				className={css.md}
-				ref={input}
-				contentEditable
-			/>
-			<hr/>
-			<pre
-				style={{whiteSpace:'pre-wrap'}}
-				dangerouslySetInnerHTML={{__html:value.replace(/\*\*(.*)\*\*/g, '<strong>**$1**</strong>')}}
-			/>
-		</>
+		<label className={cls(css.wrap, {
+			[css.focus]: focus,
+		})}>
+			{label && <span>{label}</span>}
+			<div className={css.label}>
+				<textarea
+					name={name}
+					onInput={onInput}
+					className={css.input}
+					onChange={e => setValue(e.target.value)}
+					defaultValue={defaultValue}
+					onFocus={onFocus}
+					onBlur={onBlur}
+				/>
+				<hr/>
+				<div dangerouslySetInnerHTML={{__html:parse(value)}}/>
+			</div>
+		</label>
 	);
 }

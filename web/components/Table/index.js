@@ -44,7 +44,7 @@ export default function Table ({
 			</tr>
 			</thead>
 			<tbody>
-			{data.map((row, i) => (
+			{data?.map((row, i) => (
 				<tr key={i}>
 					{columns.map(col => (
 						<td key={col.handle}>
@@ -55,6 +55,13 @@ export default function Table ({
 					))}
 				</tr>
 			))}
+			{!data?.length && (
+				<tr>
+					<td colSpan={columns.length}>
+						No results
+					</td>
+				</tr>
+			)}
 			</tbody>
 		</table>
 	);
