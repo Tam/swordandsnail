@@ -33,7 +33,7 @@ export async function middleware (req) {
 	if (!sid) {
 		const resp = await fetch(URI.replace('graphql', 'session'), {
 			method: 'GET',
-			credentials: 'include',
+			//credentials: 'include',
 		});
 
 		if (isProtectedUrl) {
@@ -51,7 +51,7 @@ export async function middleware (req) {
 
 	const resp = await fetch(URI, {
 		method: 'POST',
-		credentials: 'include',
+		//credentials: 'include',
 		headers: {
 			'Content-Type': 'application/json',
 			'cookie': req.headers.get('cookie'),
