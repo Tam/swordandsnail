@@ -34,7 +34,6 @@ function MyApp ({ Component, pageProps, isLoggedIn }) {
 MyApp.getInitialProps = async ctx => {
 	const props = await App.getInitialProps(ctx);
 
-	// TODO: We need a better way of knowing when a user is logged in
 	if (!process.browser)
 		props.isLoggedIn = !!ctx?.ctx?.req?.cookies?.['snail.logged_in'];
 
