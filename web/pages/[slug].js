@@ -2,12 +2,13 @@ import { gql } from 'urql';
 import Title from '../components/Title';
 import { parse } from 'marked';
 import createClient from '../lib/client';
+import Prose from '../components/Prose';
 
 export default function Page ({ title, text }) {
 	return (
 		<>
 			<Title>{title}</Title>
-			<div dangerouslySetInnerHTML={{ __html: text }} />
+			<Prose>{text}</Prose>
 		</>
 	);
 }

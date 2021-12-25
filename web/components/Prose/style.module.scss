@@ -1,0 +1,55 @@
+@import "../../styles/variables";
+
+.prose {
+	max-width: var(--theme_text-column-width, 120ch);
+
+	h1,
+	h2,
+	h3 {
+		margin-bottom: size($spacer * 0.5);
+		font-weight: bold;
+		line-height: 1.2em;
+
+		&:not(:first-child) {
+			margin-top: size($spacer * 1.5);
+		}
+	}
+
+	h1 {
+		font-size: size(48);
+	}
+
+	h2 {
+		font-size: size(32);
+	}
+
+	h3 {
+		font-size: size(24);
+	}
+
+	ul,
+	ol {
+		margin: 0 0 size($spacer * 0.5) size($spacer);
+	}
+
+	ul {
+		list-style: square;
+	}
+
+	ol {
+		list-style: georgian;
+	}
+
+	p,
+	li {
+		line-height: 1.5em;
+
+		&:not(:last-child) {
+			margin-bottom: size($spacer * 0.5);
+		}
+	}
+
+	li:not(:last-child) {
+		margin-bottom: size($spacer * 0.3);
+	}
+}

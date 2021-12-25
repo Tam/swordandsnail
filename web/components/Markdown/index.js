@@ -1,9 +1,12 @@
 import css from './style.module.scss';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { parse } from 'marked';
 import cls from '../../util/cls';
+import Prose from '../Prose';
 
 export default function Markdown ({ name, label, defaultValue = '' }) {
+	const self = useRef();
+
 	const [value, setValue] = useState(defaultValue)
 		, [focus, setFocus] = useState(false);
 
@@ -18,6 +21,13 @@ export default function Markdown ({ name, label, defaultValue = '' }) {
 	const onFocus = () => setFocus(true)
 		, onBlur  = () => setFocus(false);
 
+	useEffect(() => {
+		if (self.current) {
+			onInput({ target: self.current });
+			setValue(defaultValue);
+		}
+	}, [defaultValue, self]);
+
 	return (
 		<label className={cls(css.wrap, {
 			[css.focus]: focus,
@@ -25,6 +35,7 @@ export default function Markdown ({ name, label, defaultValue = '' }) {
 			{label && <span>{label}</span>}
 			<div className={css.label}>
 				<textarea
+					ref={self}
 					name={name}
 					onInput={onInput}
 					className={css.input}
@@ -34,7 +45,7 @@ export default function Markdown ({ name, label, defaultValue = '' }) {
 					onBlur={onBlur}
 				/>
 				<hr/>
-				<div dangerouslySetInnerHTML={{__html:parse(value)}}/>
+				<Prose>{parse(value)}</Prose>
 			</div>
 		</label>
 	);

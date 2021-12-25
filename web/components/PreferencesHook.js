@@ -14,6 +14,7 @@ export default function PreferencesHook () {
 	                    id: nodeId
                         font
                         theme
+	                    textColumnWidth
                     }
                 }
             }
@@ -27,6 +28,7 @@ export default function PreferencesHook () {
 			css[`theme${capitalize(preferences?.theme?.toLowerCase() ?? 'system')}`],
 			css[`font${capitalize(preferences?.font?.toLowerCase() ?? 'quattro')}`],
 		);
+		document.body.style.setProperty('--theme_text-column-width', (preferences?.textColumnWidth ?? 120) + 'ch');
 	}, [preferences]);
 
 	return null;
