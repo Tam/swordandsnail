@@ -9,16 +9,20 @@ import SessionContext from '../../contexts/SessionContext';
 export default function Header () {
 	const router = useRouter()
 		, menu = useRef()
-		, [, setSession] = useContext(SessionContext)
+		, [{ isLoggedIn }, setSession] = useContext(SessionContext)
 		, [menuOpen, setMenuOpen] = useState(false);
 
-	const [{ data }] = useQuery({
+	const [{ data }, refetch] = useQuery({
 		query: gql`
 			query ViewerRole {
 				viewer { account { role } }
 			}
-		`
+		`,
 	});
+
+	useEffect(() => {
+		isLoggedIn && refetch({ requestPolicy: 'network-only' });
+	}, [isLoggedIn]);
 
 	const [, logout] = useMutation(gql`
         mutation Logout {
@@ -55,6 +59,7 @@ export default function Header () {
 	};
 
 	const onLogoutClick = async () => {
+		// TODO: clear urql cache
 		setSession(p => ({ ...p, isLoggedIn: false }));
 		await logout();
 		await router.push('/');
@@ -71,34 +76,38 @@ export default function Header () {
 			<div className={css.menuWrap}>
 				<button onClick={onToggleFullscreenClick} title="Toggle Fullscreen">[ ]</button>
 
-				<button
-					onClick={onToggleMenuClick}
-					title="User Menu"
-					id="userMenuBtn"
-					aria-haspopup="true"
-					aria-controls="userMenu"
-					aria-expanded={menuOpen}
-				>
-					@
-				</button>
+				{isLoggedIn && (
+					<>
+						<button
+							onClick={onToggleMenuClick}
+							title="User Menu"
+							id="userMenuBtn"
+							aria-haspopup="true"
+							aria-controls="userMenu"
+							aria-expanded={menuOpen}
+						>
+							@
+						</button>
 
-				{menuOpen && (
-					<ul
-						className={css.menu}
-						ref={menu}
-						id="userMenu"
-						role="menu"
-						aria-labelledby="userMenuBtn"
-					>
-						<li><A href="/account" role="menuitem">My Account</A></li>
-						{isDesigner && (
-							<li><A href="/studio" role="menuitem">Studio</A></li>
+						{menuOpen && (
+							<ul
+								className={css.menu}
+								ref={menu}
+								id="userMenu"
+								role="menu"
+								aria-labelledby="userMenuBtn"
+							>
+								<li><A href="/account" role="menuitem">My Account</A></li>
+								{isDesigner && (
+									<li><A href="/studio" role="menuitem">Studio</A></li>
+								)}
+								{isAdmin && (
+									<li><A href="/admin" role="menuitem">Admin</A></li>
+								)}
+								<li><Button onClick={onLogoutClick} role="menuitem">Sign out</Button></li>
+							</ul>
 						)}
-						{isAdmin && (
-							<li><A href="/admin" role="menuitem">Admin</A></li>
-						)}
-						<li><Button onClick={onLogoutClick} role="menuitem">Sign out</Button></li>
-					</ul>
+					</>
 				)}
 			</div>
 		</header>

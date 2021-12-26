@@ -134,4 +134,4 @@ export async function middleware (req) {
 }
 
 const setIsLoggedInCookie = (res, val) =>
-	res.cookie('snail.logged_in', val ? '1' : '', { maxAge: val ? void 0 : 0, secure: true, httpOnly: true });
+	res.cookie('snail.logged_in', val ? '1' : '', { maxAge: val ? void 0 : 0, secure: true, httpOnly: true, sameSite: 'Lax' });
