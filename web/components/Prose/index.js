@@ -29,10 +29,16 @@ export default function Prose ({
 	El = 'div',
 	className,
 	children,
+	horizontalCenter = false,
 	...props
 }) {
 	return (
-		<div className={cls(css.prose, className)} {...props}>
+		<div
+			className={cls(css.prose, className, {
+				[css.horizontalCenter]: horizontalCenter
+			})}
+			{...props}
+		>
 			{React.Children.map(children, child => {
 				if (typeof child === 'string') {
 					const parsed = parse(child, options);

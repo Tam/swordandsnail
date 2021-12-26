@@ -1,8 +1,9 @@
 @import "../../styles/variables";
 
 .header {
-	position: relative;
+	position: sticky;
 	z-index: $z-header;
+	top: size(-$spacer * 0.5);
 
 	display: flex;
 	align-items: stretch;
@@ -11,6 +12,8 @@
 	padding: size($spacer * 0.5) 0 0;
 
 	border-bottom: size(2) solid $text-color;
+	background: $background-color;
+	box-shadow: 0 size(4) 0 $background-color;
 }
 
 .logo {

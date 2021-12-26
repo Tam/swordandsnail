@@ -1,11 +1,14 @@
 import { gql, useQuery } from 'urql';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import css from '../styles/theme.module.scss';
 import cls from '../util/cls';
 import capitalize from '../util/capitalize';
+import SessionContext from '../contexts/SessionContext';
 
 export default function PreferencesHook () {
-	const [{ data }] = useQuery({
+	const [{ isLoggedIn }] = useContext(SessionContext);
+
+	const [{ data }, refetch] = useQuery({
 		query: gql`
             query GetPreferences {
                 viewer {
@@ -20,6 +23,10 @@ export default function PreferencesHook () {
             }
 		`,
 	});
+
+	useEffect(() => {
+		isLoggedIn && refetch({ requestPolicy: 'network-only' });
+	}, [isLoggedIn]);
 
 	const preferences = data?.viewer?.preference;
 

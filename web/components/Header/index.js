@@ -62,7 +62,7 @@ export default function Header () {
 		// TODO: clear urql cache
 		setSession(p => ({ ...p, isLoggedIn: false }));
 		await logout();
-		await router.push('/');
+		await router.push('/'); // TODO: only redirect if they're on a protected page
 	};
 
 	const viewer = data?.viewer;

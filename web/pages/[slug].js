@@ -8,7 +8,7 @@ export default function Page ({ title, text }) {
 	return (
 		<>
 			<Title>{title}</Title>
-			<Prose>{text}</Prose>
+			<Prose horizontalCenter>{text}</Prose>
 		</>
 	);
 }
