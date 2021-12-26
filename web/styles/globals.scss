@@ -13,7 +13,7 @@
 html {
 	height: 100%;
 	-ms-overflow-style: -ms-autohiding-scrollbar;
-	scroll-behavior: smooth;
+	//scroll-behavior: smooth;
 
 	@include responsiveSize(14, 16);
 	font-family: $font-family-quattro;

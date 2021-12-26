@@ -1,8 +1,8 @@
 import css from './style.module.scss';
 import { useEffect, useRef, useState } from 'react';
-import { parse } from 'marked';
 import cls from '../../util/cls';
 import Prose from '../Prose';
+import md from '../../util/md';
 
 export default function Markdown ({ name, label, defaultValue = '' }) {
 	const self = useRef();
@@ -45,7 +45,7 @@ export default function Markdown ({ name, label, defaultValue = '' }) {
 					onBlur={onBlur}
 				/>
 				<hr/>
-				<Prose>{parse(value)}</Prose>
+				<Prose>{md(value)}</Prose>
 			</div>
 		</label>
 	);

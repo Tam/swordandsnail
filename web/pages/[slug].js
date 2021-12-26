@@ -1,8 +1,8 @@
 import { gql } from 'urql';
 import Title from '../components/Title';
-import { parse } from 'marked';
 import createClient from '../lib/client';
 import Prose from '../components/Prose';
+import md from '../util/md';
 
 export default function Page ({ title, text }) {
 	return (
@@ -22,6 +22,7 @@ export async function getStaticProps ({ params: { slug } }) {
 				id
 				title
 				text
+				updatedAt
 			}
 		}
 	`, { slug }).toPromise();
@@ -34,7 +35,7 @@ export async function getStaticProps ({ params: { slug } }) {
 	return {
 		props: {
 			title: page.title,
-			text: parse(page.text)
+			text: md(page.text, page)
 		},
 		revalidate: 10,
 	};
