@@ -1,0 +1,21 @@
+@import "../../styles/variables";
+
+.tooltip {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 9999;
+	display: none;
+	padding: size($spacer * 0.5);
+
+	background-color: $background-color;
+	border: size(2) solid $text-color;
+	box-shadow: 0 size(1) 0 size(4) $background-color;
+
+	transform: translate3d(var(--x), var(--y), 0);
+	pointer-events: none;
+}
+
+.visible {
+	display: block;
+}

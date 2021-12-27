@@ -1,5 +1,6 @@
 import Title from '../../components/Title';
-import World from '../../hinterland/world';
+import dynamic from 'next/dynamic';
+const World = dynamic(() => import('../../hinterland/world'), { ssr: false });
 
 export default function Hinterland () {
 	return (

@@ -1,88 +1,160 @@
 import css from './style.module.scss';
 import Button from '../../components/Button';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
+import Tooltip from '../../components/Tooltip';
 import Input from '../../components/Input';
+import cls from '../../util/cls';
+import randomFromArray from '../../util/random';
 
-const TEST_SQUARE = `# # #
-#    #
-# # #`;
+const BIOME = {
+	'FOREST': { weight: 0.44, icon: '🌳' },
+	'MOUNTAIN': { weight: 0.04, icon: '🏔' },
+	'DESERT': { weight: 0.04, icon: '🏜' },
+	'LAKE': { weight: 0.04, icon: '💧' },
+	'PLAINS': { weight: 0.44, icon: '🌾' },
+};
 
-function generateWorld () {
+const RESOURCE = {
+	'BARREN': { type: 'EMPTY', icon: '', biome: [] },
+	'FISH': { type: 'FOOD', icon: '🐟', biome: ['LAKE'] },
+	'WILD_GAME': { type: 'FOOD', icon: '🦌', biome: ['PLAINS', 'FOREST'] },
+	'FARMLAND': { type: 'FOOD', icon: '👩‍🌾', biome: ['PLAINS'] },
+	'FRESH_WATER': { type: 'BONUS', icon: '💦', biome: ['LAKE'] },
+	'STONE': { type: 'SUPPLY', icon: '🪨', biome: ['MOUNTAIN'] },
+	'IRON': { type: 'SUPPLY', icon: '⛓', biome: ['MOUNTAIN', 'DESERT'] },
+	'CLAY': { type: 'SUPPLY', icon: '🧱', biome: ['MOUNTAIN', 'LAKE'] },
+	'WOOD': { type: 'SUPPLY', icon: '🪵', biome: ['FOREST'] },
+};
+
+const MOB = {
+	'ORK': { biome: ['MOUNTAIN', 'DESERT'] },
+	'DARK_ELF': { biome: ['FOREST', 'PLAINS'] },
+	'DARK_DWARF': { biome: ['MOUNTAIN'] },
+	'DROWNED_DEAD': { biome: ['LAKE'] },
+	'SPIDERS': { biome: ['FOREST'] },
+	'WOLVES': { biome: ['FOREST', 'PLAINS'] },
+	'UNDEAD': { biome: ['FOREST', 'DESERT', 'MOUNTAIN'] },
+	'GIANT': { biome: ['FOREST', 'DESERT', 'MOUNTAIN'] },
+};
+
+function byBiome (set) {
+	return Object.keys(set).reduce((a, b) => {
+		const resource = set[b];
+		resource.biome.forEach(biome => {
+			if (!a.hasOwnProperty(biome)) a[biome] = [];
+			a[biome].push(b);
+		});
+
+		return a;
+	}, {});
+}
+
+const RESOURCE_BY_BIOME = byBiome(RESOURCE)
+	, MOB_BY_BIOME = byBiome(MOB);
+
+function weightedRandom (spec) {
+	let key, sum = 0, r = Math.random();
+	for (key in spec) {
+		sum += spec[key].weight;
+		if (r <= sum) return key;
+	}
+}
+
+function insideCircle (x, y, rad = 3) {
+	return (x * x + y * y) <= rad * rad;
+}
+
+function generateWorld (mapSize = 5) {
 	const world = [];
 
-	for (let y = 0, l = 11; y < l; y++) {
-		for (let x = 0, l = 11; x < l; x++) {
-			world.push([x, y]);
+	for (let y = -mapSize, l = mapSize; y <= l; y++) {
+		for (let x = -mapSize, l = mapSize; x <= l; x++) {
+			let difficulty = 1,
+				rad = 1.5;
+
+			while (rad < 8)
+				if (!insideCircle(x, y, rad++))
+					difficulty++;
+
+			if (difficulty > 1) {
+				if (Math.random() > 0.9) difficulty += 2;
+				else if (Math.random() > 0.8) difficulty++;
+				else if (Math.random() < 0.1) difficulty--;
+			}
+
+			const biome = weightedRandom(BIOME);
+			const resource = Math.random() > 0.15
+				? randomFromArray(RESOURCE_BY_BIOME[biome])
+				: 'BARREN';
+			const mob = randomFromArray(MOB_BY_BIOME[biome]);
+
+			world.push({ x, y, difficulty, biome, resource, mob });
 		}
 	}
 
 	return world;
 }
 
-function insideCircle (x, y, rad = 3) {
-	const dx = 5 - x
-		, dy = 5 - y;
-
-	return (dx * dx + dy * dy) <= rad * rad;
-}
-
 export default function World () {
-	const [rad, setRad] = useState(2.5)
-		, [thickness, setThickness] = useState(1);
+	const [mapSize, setMapSize] = useState(4);
+	const [world, setWorld] = useState(generateWorld(mapSize));
 
-	const world = useMemo(() => {
-		return generateWorld();
-	}, []);
-
-	useEffect(() => {
-		const i = setInterval(() => {
-			setRad(r => {
-				r = r + thickness;
-				if (r > 7 + thickness) r = 0.5;
-				return r;
-			})
-		}, 250 * thickness);
-
-		return () => {
-			clearInterval(i);
+	const onGenerateClick = () => setWorld(generateWorld(mapSize))
+		, onMapSizeChange = e => {
+			const size = +e.target.value;
+			setMapSize(size);
+			setWorld(generateWorld(size));
 		};
-	}, [thickness]);
-
-	const onRadChange = e => setRad(+e.target.value)
-		, onThicknessChange = e => setThickness(+e.target.value);
 
 	return (
 		<div className={css.wrap}>
-			<div className={css.world}>
-				{world.map(([x, y], i) => (
-					<span key={i}>
-						{insideCircle(x, y, rad) && !insideCircle(x, y, rad - thickness)
-							? TEST_SQUARE
-							: `${x}, ${y}`
-						}
-					</span>
+			<div className={css.world} style={{'--map-size': mapSize}}>
+				{world.map(({ x, y, difficulty, biome, resource, mob }, i) =>  x === 0 && y === 0 ? (
+					<Tooltip key={`${mapSize}_${i}`} content={(
+						<>
+							<strong>Your Village</strong><br/>
+							<strong>X:</strong> {x}<br/>
+							<strong>Y:</strong> {y}
+						</>
+					)}>
+						<span className={cls(css.cell, css.village)}>
+							<span>Village</span>
+						</span>
+					</Tooltip>
+				) : !insideCircle(x, y, mapSize + 0.5) ? (
+					<span key={i} className={css.cell} />
+				) : (
+					<Tooltip key={`${mapSize}_${i}`} content={(
+						<>
+							<strong>Untamed Hinterland</strong><br/>
+							<strong>X:</strong> {x}<br/>
+							<strong>Y:</strong> {y}<br/>
+							<strong>Difficulty:</strong> {difficulty}<br/>
+							<strong>Biome:</strong> {biome}<br/>
+							<strong>Resource:</strong> {resource}<br/>
+							<strong>Mob:</strong> {mob}
+						</>
+					)}>
+						<span className={css.cell}>
+							{BIOME[biome].icon}<small>{RESOURCE[resource].icon}</small>
+							<span>{Array.from(
+								{length:difficulty},
+								(_, i) => <i key={i} />
+							)}</span>
+						</span>
+					</Tooltip>
 				))}
 			</div>
 			<div>
-				<Button>Generate World</Button>
+				<Button onClick={onGenerateClick}>Generate World</Button>
 				<br/><br/>
 				<Input
-					label="Circle Radius"
+					label="Map Size"
 					type="range"
-					defaultValue={rad}
-					min={0.5}
-					max={6.5 + thickness}
-					step={thickness}
-					onInput={onRadChange}
-				/>
-				<Input
-					label="Circle Thickness"
-					type="range"
-					defaultValue={thickness}
-					min={1}
-					max={3}
-					step={1}
-					onInput={onThicknessChange}
+					min={2}
+					max={6}
+					defaultValue={mapSize}
+					onInput={onMapSizeChange}
 				/>
 			</div>
 		</div>
