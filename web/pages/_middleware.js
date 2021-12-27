@@ -59,7 +59,7 @@ export async function middleware (req) {
 		// redirect to login
 		if (isProtectedUrl) {
 			res = NextResponse.redirect(LOGIN_URL);
-			res.cookie('snail.post_login', url.pathname, { secure: true, httpOnly: true });
+			res.cookie('snail.post_login', url.pathname, { secure: true, httpOnly: true, sameSite: 'Strict' });
 		}
 
 		setIsLoggedInCookie(res, 0);
@@ -89,7 +89,7 @@ export async function middleware (req) {
 
 		if (isProtectedUrl) {
 			res = NextResponse.redirect(LOGIN_URL);
-			res.cookie('snail.post_login', url.pathname, { secure: true, httpOnly: true });
+			res.cookie('snail.post_login', url.pathname, { secure: true, httpOnly: true, sameSite: 'Strict' });
 		}
 
 		setIsLoggedInCookie(res, 0);
@@ -102,7 +102,7 @@ export async function middleware (req) {
 
 	if (postLoginRedirect) {
 		const res = NextResponse.redirect(postLoginRedirect);
-		res.cookie('snail.post_login', '', { maxAge: 0, secure: true, httpOnly: true });
+		res.cookie('snail.post_login', '', { maxAge: 0, secure: true, httpOnly: true, sameSite: 'Strict' });
 		setIsLoggedInCookie(res, 1);
 
 		return res;
@@ -134,4 +134,4 @@ export async function middleware (req) {
 }
 
 const setIsLoggedInCookie = (res, val) =>
-	res.cookie('snail.logged_in', val ? '1' : '', { maxAge: val ? void 0 : 0, secure: true, httpOnly: true, sameSite: 'Lax' });
+	res.cookie('snail.logged_in', val ? '1' : '', { maxAge: val ? void 0 : 0, secure: true, httpOnly: true, sameSite: 'Strict' });

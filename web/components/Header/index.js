@@ -71,32 +71,32 @@ export default function Header () {
 
 	return (
 		<header className={css.header}>
-			<A href="/games" className={css.logo}>Sword & Snail</A>
+			<A href={isLoggedIn ? '/games' : '/'} className={css.logo}>Sword & Snail</A>
 
 			<div className={css.menuWrap}>
 				<button onClick={onToggleFullscreenClick} title="Toggle Fullscreen">[ ]</button>
 
-				{isLoggedIn && (
-					<>
-						<button
-							onClick={onToggleMenuClick}
-							title="User Menu"
-							id="userMenuBtn"
-							aria-haspopup="true"
-							aria-controls="userMenu"
-							aria-expanded={menuOpen}
-						>
-							@
-						</button>
+				<button
+					onClick={onToggleMenuClick}
+					title="User Menu"
+					id="userMenuBtn"
+					aria-haspopup="true"
+					aria-controls="userMenu"
+					aria-expanded={menuOpen}
+				>
+					@
+				</button>
 
-						{menuOpen && (
-							<ul
-								className={css.menu}
-								ref={menu}
-								id="userMenu"
-								role="menu"
-								aria-labelledby="userMenuBtn"
-							>
+				{menuOpen && (
+					<ul
+						className={css.menu}
+						ref={menu}
+						id="userMenu"
+						role="menu"
+						aria-labelledby="userMenuBtn"
+					>
+						{isLoggedIn ? (
+							<>
 								<li><A href="/account" role="menuitem">My Account</A></li>
 								{isDesigner && (
 									<li><A href="/studio" role="menuitem">Studio</A></li>
@@ -105,9 +105,14 @@ export default function Header () {
 									<li><A href="/admin" role="menuitem">Admin</A></li>
 								)}
 								<li><Button onClick={onLogoutClick} role="menuitem">Sign out</Button></li>
-							</ul>
+							</>
+						) : (
+							<>
+								<li><A href="/signin">Sign In</A></li>
+								<li><Button href="/signup">Sign Up</Button></li>
+							</>
 						)}
-					</>
+					</ul>
 				)}
 			</div>
 		</header>
