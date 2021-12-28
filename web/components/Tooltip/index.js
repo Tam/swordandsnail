@@ -23,10 +23,10 @@ function TooltipElComponent () {
 			const rgt = x + rect.width
 				, btm = y + rect.height;
 
-			if (rgt > window.innerWidth)
-				x -= rect.width + 20;
+			if (rgt > window.innerWidth - 10)
+				x -= rect.width + 10;
 
-			if (btm > window.innerHeight)
+			if (btm > window.innerHeight - 10)
 				y -= (btm - window.innerHeight) + 10;
 
 			el.style.setProperty('--x', x + 'px');

@@ -15,7 +15,8 @@ const BIOME = {
 };
 
 const RESOURCE = {
-	'BARREN': { type: 'EMPTY', icon: '', biome: [] },
+	'BARREN': { type: 'EMPTY', icon: '', biome: null },
+	'FORTRESS': { type: 'SPAWNER', icon: '🏰', biome: ['PLAINS','FOREST','MOUNTAIN','DESERT'] },
 	'FISH': { type: 'FOOD', icon: '🐟', biome: ['LAKE'] },
 	'WILD_GAME': { type: 'FOOD', icon: '🦌', biome: ['PLAINS', 'FOREST'] },
 	'FARMLAND': { type: 'FOOD', icon: '👩‍🌾', biome: ['PLAINS'] },
@@ -31,6 +32,7 @@ const MOB = {
 	'DARK_ELF': { biome: ['FOREST', 'PLAINS'] },
 	'DARK_DWARF': { biome: ['MOUNTAIN'] },
 	'DROWNED_DEAD': { biome: ['LAKE'] },
+	'SHARKS': { biome: ['LAKE'] },
 	'SPIDERS': { biome: ['FOREST'] },
 	'WOLVES': { biome: ['FOREST', 'PLAINS'] },
 	'UNDEAD': { biome: ['FOREST', 'DESERT', 'MOUNTAIN'] },
@@ -40,6 +42,10 @@ const MOB = {
 function byBiome (set) {
 	return Object.keys(set).reduce((a, b) => {
 		const resource = set[b];
+
+		if (resource.biome === null)
+			return a;
+
 		resource.biome.forEach(biome => {
 			if (!a.hasOwnProperty(biome)) a[biome] = [];
 			a[biome].push(b);
@@ -69,6 +75,16 @@ function generateWorld (mapSize = 5) {
 
 	for (let y = -mapSize, l = mapSize; y <= l; y++) {
 		for (let x = -mapSize, l = mapSize; x <= l; x++) {
+			if (!insideCircle(x, y, mapSize + 0.5)) {
+				world.push({ x, y, isEmpty: true });
+				continue;
+			}
+
+			if (x === 0 && y === 0) {
+				world.push({ x, y, isVillage: true });
+				continue;
+			}
+
 			let difficulty = 1,
 				rad = 1.5;
 
@@ -77,7 +93,7 @@ function generateWorld (mapSize = 5) {
 					difficulty++;
 
 			if (difficulty > 1) {
-				if (Math.random() > 0.9) difficulty += 2;
+				if (Math.random() > 0.95) difficulty += 2;
 				else if (Math.random() > 0.8) difficulty++;
 				else if (Math.random() < 0.1) difficulty--;
 			}
@@ -108,42 +124,51 @@ export default function World () {
 
 	return (
 		<div className={css.wrap}>
-			<div className={css.world} style={{'--map-size': mapSize}}>
-				{world.map(({ x, y, difficulty, biome, resource, mob }, i) =>  x === 0 && y === 0 ? (
-					<Tooltip key={`${mapSize}_${i}`} content={(
-						<>
-							<strong>Your Village</strong><br/>
-							<strong>X:</strong> {x}<br/>
-							<strong>Y:</strong> {y}
-						</>
-					)}>
-						<span className={cls(css.cell, css.village)}>
-							<span>Village</span>
-						</span>
-					</Tooltip>
-				) : !insideCircle(x, y, mapSize + 0.5) ? (
-					<span key={i} className={css.cell} />
-				) : (
-					<Tooltip key={`${mapSize}_${i}`} content={(
-						<>
-							<strong>Untamed Hinterland</strong><br/>
-							<strong>X:</strong> {x}<br/>
-							<strong>Y:</strong> {y}<br/>
-							<strong>Difficulty:</strong> {difficulty}<br/>
-							<strong>Biome:</strong> {biome}<br/>
-							<strong>Resource:</strong> {resource}<br/>
-							<strong>Mob:</strong> {mob}
-						</>
-					)}>
-						<span className={css.cell}>
-							{BIOME[biome].icon}<small>{RESOURCE[resource].icon}</small>
-							<span>{Array.from(
-								{length:difficulty},
-								(_, i) => <i key={i} />
-							)}</span>
-						</span>
-					</Tooltip>
-				))}
+			<div>
+				<div className={css.world} style={{'--map-size': mapSize}}>
+					{world.map((cell, i) => {
+						if (cell.isEmpty)
+							return <span key={i} className={css.cell} />;
+
+						if (cell.isVillage) {
+							return (
+								<Tooltip key={`${mapSize}_${i}`} content={(
+									<>
+										<strong>Your Village</strong> ({cell.x}, {cell.y})
+									</>
+								)}>
+									<span className={cls(css.cell, css.village)}>
+										🏘
+									</span>
+								</Tooltip>
+							);
+						}
+
+						const { x, y, difficulty, biome, resource, mob } = cell;
+
+						return (
+							<Tooltip key={`${mapSize}_${i}`} content={(
+								<>
+									<strong>Untamed Hinterland</strong> ({x}, {y})<br/>
+									<strong>Difficulty:</strong> {difficulty}<br/>
+									<strong>Biome:</strong> {biome}<br/>
+									<strong>Resource:</strong> {resource}<br/>
+									<strong>Mob:</strong> {mob}
+								</>
+							)}>
+								<span className={css.cell}>
+									{RESOURCE[resource].icon ? (
+										<>{RESOURCE[resource].icon}<small>{BIOME[biome].icon}</small></>
+									) : BIOME[biome].icon}
+									<span>{Array.from(
+										{length:difficulty},
+										(_, i) => <i key={i} />
+									)}</span>
+								</span>
+							</Tooltip>
+						);
+					})}
+				</div>
 			</div>
 			<div>
 				<Button onClick={onGenerateClick}>Generate World</Button>

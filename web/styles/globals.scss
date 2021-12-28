@@ -67,8 +67,16 @@ body {
 }
 
 main {
+	display: flex;
+	//align-items: center;
+	justify-content: center;
 	flex: 1;
 	padding: size($spacer);
+
+	> * {
+		width: 100%;
+		min-height: 100%;
+	}
 }
 
 p {

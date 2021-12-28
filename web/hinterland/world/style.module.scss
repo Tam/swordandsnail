@@ -4,6 +4,12 @@
 	display: grid;
 	grid-template-columns: 1fr 300px;
 	grid-column-gap: #{size($spacer)};
+
+	> div:first-child {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
 }
 
 .world {
@@ -75,18 +81,16 @@
 	span {
 		position: absolute;
 		z-index: 3;
-		top: 50%;
+		bottom: 0;
 		left: 50%;
 
 		font-size: 0;
 		white-space: nowrap;
 
-		transform: translate3d(-50%, -50%, 0);
+		transform: translate3d(-50%, -100%, 0);
 	}
 }
 
 .village {
-	span {
-		font-size: size(16);
-	}
+	font-size: size(64);
 }

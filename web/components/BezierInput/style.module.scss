@@ -1,0 +1,40 @@
+@import "../../styles/variables";
+
+.preview {
+	overflow: visible;
+	cursor: pointer;
+}
+
+.miniPath {
+	stroke: $text-color;
+	stroke-width: size(3);
+	stroke-linecap: round;
+	fill: none;
+}
+
+.input {
+	overflow: visible;
+
+	circle {
+		fill: rgba(0,0,0,0);
+		stroke: $text-color;
+		stroke-width: size(2);
+
+		cursor: move;
+
+		&:hover {
+			fill: $text-color;
+		}
+
+		&[r="16"] {
+			cursor: ns-resize;
+		}
+	}
+
+	line {
+		stroke: $text-color;
+		stroke-width: size(1);
+		stroke-linecap: round;
+		stroke-dasharray: 1,3;
+	}
+}
