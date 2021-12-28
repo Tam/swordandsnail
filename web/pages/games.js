@@ -10,10 +10,6 @@ export default function Games () {
 			<ul>
 				<li><A href="/hinterland">Into the Hinterlands</A></li>
 			</ul>
-
-			<div>
-				<BezierInput />
-			</div>
 		</>
 	);
 }

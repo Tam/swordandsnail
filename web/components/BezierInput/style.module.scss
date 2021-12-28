@@ -1,5 +1,18 @@
 @import "../../styles/variables";
 
+.label {
+	display: block;
+
+	&:not(:last-child) {
+		margin-bottom: size(24);
+	}
+
+	span:first-child {
+		display: block;
+		margin-bottom: size(4);
+	}
+}
+
 .preview {
 	overflow: visible;
 	cursor: pointer;

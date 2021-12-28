@@ -10,7 +10,7 @@ const quad = (ax, ay, bx, by, cx, cy, t) => {
 	return lerp(dx, dy, ex, ey, t);
 };
 
-export default function bezier (startY, ax, ay, bx, by, endY, t) {
+export default function bezier ({ startY, ax, ay, bx, by, endY }, t) {
 	const startX = 0, endX = 1;
 
 	const [cx, cy] = quad(startX, startY, ax, ay, bx, by, t)

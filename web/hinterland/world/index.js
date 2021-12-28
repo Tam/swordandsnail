@@ -5,6 +5,8 @@ import Tooltip from '../../components/Tooltip';
 import Input from '../../components/Input';
 import cls from '../../util/cls';
 import randomFromArray from '../../util/random';
+import BezierInput, { BEZIER_DEFAULT } from '../../components/BezierInput';
+import bezier from '../../util/bezier';
 
 const BIOME = {
 	'FOREST': { weight: 0.44, icon: '🌳' },
@@ -15,7 +17,7 @@ const BIOME = {
 };
 
 const RESOURCE = {
-	'BARREN': { type: 'EMPTY', icon: '', biome: null },
+	'BARREN': { type: 'EMPTY', icon: '', biome: ['*'] },
 	'FORTRESS': { type: 'SPAWNER', icon: '🏰', biome: ['PLAINS','FOREST','MOUNTAIN','DESERT'] },
 	'FISH': { type: 'FOOD', icon: '🐟', biome: ['LAKE'] },
 	'WILD_GAME': { type: 'FOOD', icon: '🦌', biome: ['PLAINS', 'FOREST'] },
@@ -46,7 +48,12 @@ function byBiome (set) {
 		if (resource.biome === null)
 			return a;
 
-		resource.biome.forEach(biome => {
+		let targetBiomes = resource.biome;
+
+		if (resource.biome?.[0] === '*')
+			targetBiomes = Object.keys(BIOME);
+
+		targetBiomes.forEach(biome => {
 			if (!a.hasOwnProperty(biome)) a[biome] = [];
 			a[biome].push(b);
 		});
@@ -70,7 +77,7 @@ function insideCircle (x, y, rad = 3) {
 	return (x * x + y * y) <= rad * rad;
 }
 
-function generateWorld (mapSize = 5) {
+function generateWorld (mapSize = 5, spawnRates) {
 	const world = [];
 
 	for (let y = -mapSize, l = mapSize; y <= l; y++) {
@@ -99,9 +106,25 @@ function generateWorld (mapSize = 5) {
 			}
 
 			const biome = weightedRandom(BIOME);
-			const resource = Math.random() > 0.15
-				? randomFromArray(RESOURCE_BY_BIOME[biome])
-				: 'BARREN';
+			const allowedResources = RESOURCE_BY_BIOME[biome];
+
+			const t = difficulty / mapSize;
+			const resourcesWeightedByDifficulty = {};
+
+			let weightSum = 0;
+			for (let i = 0, l = allowedResources.length; i < l; i++) {
+				const k = allowedResources[i]
+				const key = k.toLowerCase();
+				const weight = spawnRates?.[key] ? bezier(spawnRates[key], t)[1] : 1 / allowedResources.length;
+				weightSum += weight;
+				resourcesWeightedByDifficulty[k] = { weight };
+			}
+
+			// Normalize weights to sum to 1
+			for (let i = 0, l = allowedResources.length; i < l; i++)
+				resourcesWeightedByDifficulty[allowedResources[i]].weight /= weightSum;
+			
+			const resource = weightedRandom(resourcesWeightedByDifficulty);
 			const mob = randomFromArray(MOB_BY_BIOME[biome]);
 
 			world.push({ x, y, difficulty, biome, resource, mob });
@@ -112,15 +135,24 @@ function generateWorld (mapSize = 5) {
 }
 
 export default function World () {
-	const [mapSize, setMapSize] = useState(4);
-	const [world, setWorld] = useState(generateWorld(mapSize));
+	const [mapSize, setMapSize] = useState(4)
+		, [spawnRates, setSpawnRates] = useState({
+			fortress: BEZIER_DEFAULT,
+			barren: BEZIER_DEFAULT,
+		});
+	const [world, setWorld] = useState(generateWorld(mapSize, spawnRates));
 
-	const onGenerateClick = () => setWorld(generateWorld(mapSize))
+	const onGenerateClick = () => setWorld(generateWorld(mapSize, spawnRates))
 		, onMapSizeChange = e => {
 			const size = +e.target.value;
 			setMapSize(size);
-			setWorld(generateWorld(size));
+			setWorld(generateWorld(size, spawnRates));
 		};
+
+	const onBezierInput = key => values => setSpawnRates(old => ({
+		...old,
+		[key]: values,
+	}));
 
 	return (
 		<div className={css.wrap}>
@@ -180,6 +212,16 @@ export default function World () {
 					max={6}
 					defaultValue={mapSize}
 					onInput={onMapSizeChange}
+				/>
+				<BezierInput
+					label="Fortress Spawn"
+					onInput={onBezierInput('fortress')}
+					defaultValue={spawnRates.fortress}
+				/>
+				<BezierInput
+					label="Barren Spawn"
+					onInput={onBezierInput('barren')}
+					defaultValue={spawnRates.barren}
 				/>
 			</div>
 		</div>
