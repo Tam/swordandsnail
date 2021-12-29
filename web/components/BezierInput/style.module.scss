@@ -11,11 +11,43 @@
 		display: block;
 		margin-bottom: size(4);
 	}
+
+	span:last-child {
+		position: relative;
+		z-index: 1;
+		display: block;
+
+		svg {
+			width: 100%;
+			height: auto;
+			vertical-align: middle;
+		}
+
+		&::before {
+			content: '';
+			position: absolute;
+			z-index: -1;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			background-image:
+				radial-gradient($text-color 1px, transparent 1px),
+				radial-gradient($text-color 1px, transparent 1px);
+			background-position: 0 0, 2px 2px;
+			background-size: 4px 4px;
+			opacity: 0.1;
+		}
+	}
 }
 
 .preview {
 	overflow: visible;
 	cursor: pointer;
+
+	&:hover .miniPath {
+		stroke-width: size(5);
+	}
 }
 
 .miniPath {

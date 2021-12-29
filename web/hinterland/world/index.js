@@ -7,6 +7,8 @@ import cls from '../../util/cls';
 import randomFromArray from '../../util/random';
 import BezierInput, { BEZIER_DEFAULT } from '../../components/BezierInput';
 import bezier from '../../util/bezier';
+import capitalize from '../../util/capitalize';
+import { Signal, Emit } from '../../util/signal';
 
 const BIOME = {
 	'FOREST': { weight: 0.44, icon: '🌳' },
@@ -19,6 +21,7 @@ const BIOME = {
 const RESOURCE = {
 	'BARREN': { type: 'EMPTY', icon: '', biome: ['*'] },
 	'FORTRESS': { type: 'SPAWNER', icon: '🏰', biome: ['PLAINS','FOREST','MOUNTAIN','DESERT'] },
+	'PIRATE_SHIP': { type: 'SPAWNER', icon: '☠️', biome: ['LAKE'] },
 	'FISH': { type: 'FOOD', icon: '🐟', biome: ['LAKE'] },
 	'WILD_GAME': { type: 'FOOD', icon: '🦌', biome: ['PLAINS', 'FOREST'] },
 	'FARMLAND': { type: 'FOOD', icon: '👩‍🌾', biome: ['PLAINS'] },
@@ -30,15 +33,16 @@ const RESOURCE = {
 };
 
 const MOB = {
-	'ORK': { biome: ['MOUNTAIN', 'DESERT'] },
-	'DARK_ELF': { biome: ['FOREST', 'PLAINS'] },
-	'DARK_DWARF': { biome: ['MOUNTAIN'] },
-	'DROWNED_DEAD': { biome: ['LAKE'] },
-	'SHARKS': { biome: ['LAKE'] },
-	'SPIDERS': { biome: ['FOREST'] },
-	'WOLVES': { biome: ['FOREST', 'PLAINS'] },
-	'UNDEAD': { biome: ['FOREST', 'DESERT', 'MOUNTAIN'] },
-	'GIANT': { biome: ['FOREST', 'DESERT', 'MOUNTAIN'] },
+	'ORK': { biome: ['MOUNTAIN', 'DESERT'], icon: '🤢' },
+	'DARK_ELF': { biome: ['FOREST', 'PLAINS'], icon: '🧝‍♂️' },
+	'DARK_DWARF': { biome: ['MOUNTAIN'], icon: '⛏' },
+	'DROWNED_DEAD': { biome: ['LAKE'], icon: '🏊‍♂️' },
+	'SHARKS': { biome: ['LAKE'], icon: '🦈' },
+	'SPIDERS': { biome: ['FOREST'], icon: '🕷' },
+	'WOLVES': { biome: ['FOREST', 'PLAINS'], icon: '🐺' },
+	'UNDEAD': { biome: ['FOREST', 'DESERT', 'MOUNTAIN'], icon: '🧟‍♂️' },
+	'GIANT': { biome: ['FOREST', 'DESERT', 'MOUNTAIN'], icon: '🧍‍♂️' },
+	'PIRATES': { biome: ['LAKE'], resource: ['PIRATE_SHIP'], icon: '🏴‍☠️' }, // TODO: support restricting mob by resource type
 };
 
 function byBiome (set) {
@@ -105,17 +109,33 @@ function generateWorld (mapSize = 5, spawnRates) {
 				else if (Math.random() < 0.1) difficulty--;
 			}
 
-			const biome = weightedRandom(BIOME);
-			const allowedResources = RESOURCE_BY_BIOME[biome];
-
 			const t = difficulty / mapSize;
+			const biomeKeys = Object.keys(BIOME);
+
+			const biomeWeightedByDifficulty = {};
+			let weightSum = 0;
+			for (let i = 0, l = biomeKeys.length; i < l; i++) {
+				const k = biomeKeys[i]
+				const key = k.toLowerCase();
+				const weight = spawnRates.biomes?.[key] ? bezier(spawnRates.biomes[key], t)[1] : 1 / biomeKeys.length;
+				weightSum += weight;
+				biomeWeightedByDifficulty[k] = { weight };
+			}
+
+			// Normalize weights to sum to 1
+			for (let i = 0, l = biomeKeys.length; i < l; i++)
+				biomeWeightedByDifficulty[biomeKeys[i]].weight /= weightSum;
+
+			const biome = weightedRandom(biomeWeightedByDifficulty);
+
+			const allowedResources = RESOURCE_BY_BIOME[biome];
 			const resourcesWeightedByDifficulty = {};
 
-			let weightSum = 0;
+			weightSum = 0;
 			for (let i = 0, l = allowedResources.length; i < l; i++) {
 				const k = allowedResources[i]
 				const key = k.toLowerCase();
-				const weight = spawnRates?.[key] ? bezier(spawnRates[key], t)[1] : 1 / allowedResources.length;
+				const weight = spawnRates.resources?.[key] ? bezier(spawnRates.resources[key], t)[1] : 1 / allowedResources.length;
 				weightSum += weight;
 				resourcesWeightedByDifficulty[k] = { weight };
 			}
@@ -123,24 +143,39 @@ function generateWorld (mapSize = 5, spawnRates) {
 			// Normalize weights to sum to 1
 			for (let i = 0, l = allowedResources.length; i < l; i++)
 				resourcesWeightedByDifficulty[allowedResources[i]].weight /= weightSum;
-			
+
 			const resource = weightedRandom(resourcesWeightedByDifficulty);
-			const mob = randomFromArray(MOB_BY_BIOME[biome]);
+			let mob;
+
+			do {
+				mob = randomFromArray(MOB_BY_BIOME[biome]);
+				const res = MOB[mob].resource;
+				if (res !== void 0 && res.indexOf(resource) === -1)
+					mob = null;
+			} while (mob === null);
 
 			world.push({ x, y, difficulty, biome, resource, mob });
 		}
 	}
+
+	// Emit(Signal.Notify, { message: 'New world generated!' });
 
 	return world;
 }
 
 export default function World () {
 	const [mapSize, setMapSize] = useState(4)
-		, [spawnRates, setSpawnRates] = useState({
-			fortress: BEZIER_DEFAULT,
-			barren: BEZIER_DEFAULT,
-		});
-	const [world, setWorld] = useState(generateWorld(mapSize, spawnRates));
+		, [spawnRates, setSpawnRates] = useState(() => ({
+			biomes: Object.keys(BIOME).reduce((a, b) => {
+				a[b.toLowerCase()] = BEZIER_DEFAULT;
+				return a;
+			}, {}),
+			resources: Object.keys(RESOURCE).reduce((a, b) => {
+				a[b.toLowerCase()] = BEZIER_DEFAULT;
+				return a;
+			}, {}),
+		}));
+	const [world, setWorld] = useState(() => generateWorld(mapSize, spawnRates));
 
 	const onGenerateClick = () => setWorld(generateWorld(mapSize, spawnRates))
 		, onMapSizeChange = e => {
@@ -149,9 +184,12 @@ export default function World () {
 			setWorld(generateWorld(size, spawnRates));
 		};
 
-	const onBezierInput = key => values => setSpawnRates(old => ({
+	const onBezierInput = (key, group) => values => setSpawnRates(old => ({
 		...old,
-		[key]: values,
+		[group]: {
+			...old[group],
+			[key]: values,
+		}
 	}));
 
 	return (
@@ -190,8 +228,10 @@ export default function World () {
 							)}>
 								<span className={css.cell}>
 									{RESOURCE[resource].icon ? (
-										<>{RESOURCE[resource].icon}<small>{BIOME[biome].icon}</small></>
-									) : BIOME[biome].icon}
+										<>{RESOURCE[resource].icon}<small>{BIOME[biome].icon}{MOB[mob].icon}</small></>
+									) : (
+										<>{BIOME[biome].icon}<small>{MOB[mob].icon}</small></>
+									)}
 									<span>{Array.from(
 										{length:difficulty},
 										(_, i) => <i key={i} />
@@ -202,7 +242,7 @@ export default function World () {
 					})}
 				</div>
 			</div>
-			<div>
+			<aside>
 				<Button onClick={onGenerateClick}>Generate World</Button>
 				<br/><br/>
 				<Input
@@ -213,17 +253,29 @@ export default function World () {
 					defaultValue={mapSize}
 					onInput={onMapSizeChange}
 				/>
-				<BezierInput
-					label="Fortress Spawn"
-					onInput={onBezierInput('fortress')}
-					defaultValue={spawnRates.fortress}
-				/>
-				<BezierInput
-					label="Barren Spawn"
-					onInput={onBezierInput('barren')}
-					defaultValue={spawnRates.barren}
-				/>
-			</div>
+				<details>
+					<summary>Biome Spawns</summary>
+					{Object.keys(BIOME).map(k => k.toLowerCase()).map(key => (
+						<BezierInput
+							key={key}
+							label={capitalize(key)}
+							onInput={onBezierInput(key, 'biomes')}
+							defaultValue={spawnRates.biomes[key]}
+						/>
+					))}
+				</details>
+				<details>
+					<summary>Resource Spawns</summary>
+					{Object.keys(RESOURCE).map(k => k.toLowerCase()).map(key => (
+						<BezierInput
+							key={key}
+							label={capitalize(key)}
+							onInput={onBezierInput(key, 'resources')}
+							defaultValue={spawnRates.resources[key]}
+						/>
+					))}
+				</details>
+			</aside>
 		</div>
 	);
 }

@@ -8,6 +8,7 @@ import SessionContext from '../contexts/SessionContext';
 import { useState } from 'react';
 import withSsr from '../hoc/withSsr';
 import { TooltipEl } from '../components/Tooltip';
+import Notifications from '../components/Notifications';
 
 if (!String.prototype.replaceAll)
 	String.prototype.replaceAll = function (find, replace) {
@@ -29,6 +30,7 @@ function MyApp ({ Component, pageProps, isLoggedIn }) {
 			<main><Component {...pageProps} /></main>
 			<Footer />
 			<TooltipEl />
+			<Notifications />
 		</SessionContext.Provider>
 	);
 }

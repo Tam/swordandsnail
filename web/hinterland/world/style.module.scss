@@ -10,6 +10,17 @@
 		align-items: center;
 		justify-content: center;
 	}
+
+	details {
+		margin-bottom: size($spacer * 0.5);
+		padding-left: size(15);
+	}
+
+	summary {
+		margin-bottom: size(10);
+		margin-left: size(-15);
+		cursor: pointer;
+	}
 }
 
 .world {
@@ -34,7 +45,11 @@
 
 	small {
 		position: absolute;
+		bottom: size(4);
+		right: size(10);
 		z-index: 2;
+
+		width: 1ch;
 
 		font-size: size(20);
 		text-shadow:
@@ -64,8 +79,6 @@
 			$background-color 3.44477px -2.03312px 0px,
 			$background-color 3.84068px -1.11766px 0px,
 			$background-color 3.9978px -0.132717px 0px;
-
-		transform: translate3d(75%, 65%, 0);
 	}
 
 	i {
