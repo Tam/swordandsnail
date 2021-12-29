@@ -1,0 +1,10 @@
+@import "../../styles/variables";
+
+.wrap {
+	canvas {
+		width: 100%;
+		height: auto;
+		vertical-align: middle;
+		border: size(1) dashed $text-color;
+	}
+}

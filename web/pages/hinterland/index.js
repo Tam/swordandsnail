@@ -1,12 +1,16 @@
 import Title from '../../components/Title';
-import dynamic from 'next/dynamic';
-const World = dynamic(() => import('../../hinterland/world'), { ssr: false });
+import A from '../../components/A';
 
 export default function Hinterland () {
 	return (
 		<>
 			<Title>Hinterland</Title>
-			<World />
+			<div>
+				<A href="/hinterland/world">World Generation</A>
+				<br/>
+				<br/>
+				<A href="/hinterland/region">Region Generation</A>
+			</div>
 		</>
 	);
 }
