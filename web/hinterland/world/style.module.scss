@@ -42,8 +42,14 @@
 	font-size: size(40);
 	text-align: center;
 	user-select: none;
+}
 
-	small {
+.icons {
+	small:first-child {
+		font-size: size(40);
+	}
+
+	small:not(:first-child) {
 		position: absolute;
 		bottom: size(4);
 		right: size(10);
@@ -79,7 +85,23 @@
 			$background-color 3.44477px -2.03312px 0px,
 			$background-color 3.84068px -1.11766px 0px,
 			$background-color 3.9978px -0.132717px 0px;
+
+		&:not(:last-child) {
+			transform: translateY(-100%);
+		}
 	}
+}
+
+.difficulty {
+	position: absolute;
+	z-index: 3;
+	bottom: 0;
+	left: 50%;
+
+	font-size: 0;
+	white-space: nowrap;
+
+	transform: translate3d(-50%, -100%, 0);
 
 	i {
 		display: inline-block;
@@ -89,18 +111,6 @@
 
 		background-color: red;
 		outline: 2px solid $background-color;
-	}
-
-	span {
-		position: absolute;
-		z-index: 3;
-		bottom: 0;
-		left: 50%;
-
-		font-size: 0;
-		white-space: nowrap;
-
-		transform: translate3d(-50%, -100%, 0);
 	}
 }
 

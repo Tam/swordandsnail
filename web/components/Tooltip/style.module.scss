@@ -16,6 +16,6 @@
 	pointer-events: none;
 }
 
-.visible {
+.visible[style*="--x"] {
 	display: block;
 }

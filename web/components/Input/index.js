@@ -1,4 +1,5 @@
 import css from './style.module.scss';
+import cls from '../../util/cls';
 
 export default function Input ({
 	label,
@@ -7,11 +8,14 @@ export default function Input ({
 	required = false,
 	autoFocus = false,
 	defaultValue,
+	defaultChecked = false,
 	children,
 	...props
 }) {
 	return (
-		<label className={css.label}>
+		<label className={cls(css.label, {
+			[css.isCheckbox]: type === 'checkbox',
+		})}>
 			{label && <span>{label}</span>}
 			{type === 'select' ? (
 				<span className={css.select}>
@@ -24,11 +28,21 @@ export default function Input ({
 						{children}
 					</select>
 				</span>
+			) : type === 'checkbox' ? (
+				<input
+					className={css.checkbox}
+					type="checkbox"
+					name={name}
+					required={required}
+					value={defaultValue}
+					defaultChecked={defaultChecked}
+					{...props}
+				/>
 			) : (
 				<input
 					className={css.input}
-					name={name}
 					type={type}
+					name={name}
 					required={required}
 					autoFocus={autoFocus}
 					defaultValue={defaultValue}

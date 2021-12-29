@@ -48,11 +48,21 @@ function TooltipElComponent () {
 }
 
 export default function Tooltip ({ content, children }) {
+	const [isVisible, setIsVisible] = useState(false);
+
 	const onMouseEnter = () => {
-		TooltipElComponent.setVisible(v => v + 1)
+		if (!isVisible) TooltipElComponent.setVisible(v => v + 1);
+		setIsVisible(true);
 		TooltipElComponent.setContent(content);
 	};
-	const onMouseLeave = () => TooltipElComponent.setVisible(v => v - 1);
+	const onMouseLeave = () => {
+		TooltipElComponent.setVisible(v => v - 1);
+		setIsVisible(false);
+	};
+
+	useEffect(() => {
+		if (isVisible) TooltipElComponent.setContent(content);
+	}, [content]);
 
 	return Children.map(children, child => {
 		return cloneElement(child, {

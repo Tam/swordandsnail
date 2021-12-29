@@ -5,10 +5,145 @@ import Tooltip from '../../components/Tooltip';
 import Input from '../../components/Input';
 import cls from '../../util/cls';
 import randomFromArray from '../../util/random';
-import BezierInput, { BEZIER_DEFAULT } from '../../components/BezierInput';
+import BezierInput from '../../components/BezierInput';
 import bezier from '../../util/bezier';
 import capitalize from '../../util/capitalize';
 import { Signal, Emit } from '../../util/signal';
+
+const DEFAULT_SPAWN_RATES = {
+	"biomes": {
+		"forest": {
+			"startY": 1,
+			"ax": 0.6789473684210526,
+			"ay": 0.6017543859649123,
+			"bx": 0.6789473684210526,
+			"by": 0.6017543859649123,
+			"endY": 0
+		},
+		"mountain": {
+			"startY": 0,
+			"ax": 1,
+			"ay": 0,
+			"bx": 1,
+			"by": 0,
+			"endY": 1
+		},
+		"desert": {
+			"startY": 0,
+			"ax": 0.6964912280701754,
+			"ay": 0.26140350877192986,
+			"bx": 0.6964912280701754,
+			"by": 0.26140350877192986,
+			"endY": 0
+		},
+		"lake": {
+			"startY": 0,
+			"ax": 0.8719298245614036,
+			"ay": 0.543859649122807,
+			"bx": 0.8719298245614036,
+			"by": 0.543859649122807,
+			"endY": 0
+		},
+		"plains": {
+			"startY": 1,
+			"ax": 0.6403508771929824,
+			"ay": 0.6333333333333333,
+			"bx": 0.6403508771929824,
+			"by": 0.6333333333333333,
+			"endY": 0
+		}
+	},
+	"resources": {
+		"barren": {
+			"startY": 0,
+			"ax": 1,
+			"ay": 0,
+			"bx": 0.3701754385964912,
+			"by": 0.062280701754385936,
+			"endY": 0.04824561403508776
+		},
+		"fortress": {
+			"startY": 0,
+			"ax": 0.7456140350877193,
+			"ay": 0,
+			"bx": 1,
+			"by": 0,
+			"endY": 0.4491228070175438
+		},
+		"pirate_ship": {
+			"startY": 0,
+			"ax": 0.7280701754385965,
+			"ay": 0,
+			"bx": 1,
+			"by": 0.23421052631578942,
+			"endY": 0.6657894736842105
+		},
+		"fish": {
+			"startY": 0.5,
+			"ax": 0.5,
+			"ay": 0.5,
+			"bx": 0.5,
+			"by": 0.5,
+			"endY": 0.5
+		},
+		"wild_game": {
+			"startY": 0.5,
+			"ax": 0.5070175438596491,
+			"ay": 0.0903508771929824,
+			"bx": 0.5070175438596491,
+			"by": 0.0903508771929824,
+			"endY": 0.5
+		},
+		"farmland": {
+			"startY": 0.5,
+			"ax": 0.5,
+			"ay": 0.5,
+			"bx": 0.5,
+			"by": 0.5,
+			"endY": 0.5
+		},
+		"fresh_water": {
+			"startY": 0.5,
+			"ax": 0.5,
+			"ay": 0.5,
+			"bx": 0.5,
+			"by": 0.5,
+			"endY": 0.5
+		},
+		"stone": {
+			"startY": 0.5,
+			"ax": 0.5,
+			"ay": 0.5,
+			"bx": 0.5,
+			"by": 0.5,
+			"endY": 0.5
+		},
+		"iron": {
+			"startY": 0.5,
+			"ax": 0.5,
+			"ay": 0.5,
+			"bx": 0.5,
+			"by": 0.5,
+			"endY": 0.5
+		},
+		"clay": {
+			"startY": 0.2710526315789473,
+			"ax": 0.48947368421052634,
+			"ay": 0.18333333333333335,
+			"bx": 0.48947368421052634,
+			"by": 0.18333333333333335,
+			"endY": 0.5
+		},
+		"wood": {
+			"startY": 0.7885964912280702,
+			"ax": 0.5,
+			"ay": 0.5,
+			"bx": 0.5,
+			"by": 0.5,
+			"endY": 0.5
+		}
+	}
+};
 
 const BIOME = {
 	'FOREST': { weight: 0.44, icon: '🌳' },
@@ -42,7 +177,7 @@ const MOB = {
 	'WOLVES': { biome: ['FOREST', 'PLAINS'], icon: '🐺' },
 	'UNDEAD': { biome: ['FOREST', 'DESERT', 'MOUNTAIN'], icon: '🧟‍♂️' },
 	'GIANT': { biome: ['FOREST', 'DESERT', 'MOUNTAIN'], icon: '🧍‍♂️' },
-	'PIRATES': { biome: ['LAKE'], resource: ['PIRATE_SHIP'], icon: '🏴‍☠️' }, // TODO: support restricting mob by resource type
+	'PIRATES': { biome: ['LAKE'], resource: ['PIRATE_SHIP'], icon: '🏴‍☠️' },
 };
 
 function byBiome (set) {
@@ -103,33 +238,35 @@ function generateWorld (mapSize = 5, spawnRates) {
 				if (!insideCircle(x, y, rad++))
 					difficulty++;
 
+			const depth = difficulty;
+
 			if (difficulty > 1) {
 				if (Math.random() > 0.95) difficulty += 2;
 				else if (Math.random() > 0.8) difficulty++;
 				else if (Math.random() < 0.1) difficulty--;
 			}
 
-			const t = difficulty / mapSize;
+			const t = depth / mapSize;
 			const biomeKeys = Object.keys(BIOME);
 
-			const biomeWeightedByDifficulty = {};
+			const biomeWeightedByDepth = {};
 			let weightSum = 0;
 			for (let i = 0, l = biomeKeys.length; i < l; i++) {
 				const k = biomeKeys[i]
 				const key = k.toLowerCase();
 				const weight = spawnRates.biomes?.[key] ? bezier(spawnRates.biomes[key], t)[1] : 1 / biomeKeys.length;
 				weightSum += weight;
-				biomeWeightedByDifficulty[k] = { weight };
+				biomeWeightedByDepth[k] = { weight };
 			}
 
 			// Normalize weights to sum to 1
 			for (let i = 0, l = biomeKeys.length; i < l; i++)
-				biomeWeightedByDifficulty[biomeKeys[i]].weight /= weightSum;
+				biomeWeightedByDepth[biomeKeys[i]].weight /= weightSum;
 
-			const biome = weightedRandom(biomeWeightedByDifficulty);
+			const biome = weightedRandom(biomeWeightedByDepth);
 
 			const allowedResources = RESOURCE_BY_BIOME[biome];
-			const resourcesWeightedByDifficulty = {};
+			const resourcesWeightedByDepth = {};
 
 			weightSum = 0;
 			for (let i = 0, l = allowedResources.length; i < l; i++) {
@@ -137,14 +274,14 @@ function generateWorld (mapSize = 5, spawnRates) {
 				const key = k.toLowerCase();
 				const weight = spawnRates.resources?.[key] ? bezier(spawnRates.resources[key], t)[1] : 1 / allowedResources.length;
 				weightSum += weight;
-				resourcesWeightedByDifficulty[k] = { weight };
+				resourcesWeightedByDepth[k] = { weight };
 			}
 
 			// Normalize weights to sum to 1
 			for (let i = 0, l = allowedResources.length; i < l; i++)
-				resourcesWeightedByDifficulty[allowedResources[i]].weight /= weightSum;
+				resourcesWeightedByDepth[allowedResources[i]].weight /= weightSum;
 
-			const resource = weightedRandom(resourcesWeightedByDifficulty);
+			const resource = weightedRandom(resourcesWeightedByDepth);
 			let mob;
 
 			do {
@@ -154,7 +291,7 @@ function generateWorld (mapSize = 5, spawnRates) {
 					mob = null;
 			} while (mob === null);
 
-			world.push({ x, y, difficulty, biome, resource, mob });
+			world.push({ x, y, difficulty, biome, resource, mob, isExplored: depth === 1 });
 		}
 	}
 
@@ -165,17 +302,16 @@ function generateWorld (mapSize = 5, spawnRates) {
 
 export default function World () {
 	const [mapSize, setMapSize] = useState(4)
-		, [spawnRates, setSpawnRates] = useState(() => ({
-			biomes: Object.keys(BIOME).reduce((a, b) => {
-				a[b.toLowerCase()] = BEZIER_DEFAULT;
-				return a;
-			}, {}),
-			resources: Object.keys(RESOURCE).reduce((a, b) => {
-				a[b.toLowerCase()] = BEZIER_DEFAULT;
-				return a;
-			}, {}),
-		}));
+		, [spawnRates, setSpawnRates] = useState(DEFAULT_SPAWN_RATES);
 	const [world, setWorld] = useState(() => generateWorld(mapSize, spawnRates));
+	const [appearance, setAppearance] = useState({
+		biomeIcons: true,
+		resourceIcons: true,
+		mobIcons: true,
+		fogOfWar: true,
+	});
+
+	const coordToIndex = (x, y) => (x + mapSize) + (mapSize * 2 + 1) * (y + mapSize);
 
 	const onGenerateClick = () => setWorld(generateWorld(mapSize, spawnRates))
 		, onMapSizeChange = e => {
@@ -191,6 +327,27 @@ export default function World () {
 			[key]: values,
 		}
 	}));
+
+	const onCheckboxChange = key => e => setAppearance(old => ({
+		...old,
+		[key]: e.target.checked,
+	}));
+
+	const onCellClick = ({ x, y }) => () => {
+		setWorld(old => {
+			const next = [...old];
+			const l = next.length;
+			let coord;
+
+			if ((coord = coordToIndex(x - 1, y)) < l && coord > 0 && next[coord].y === y) next[coord].isExplored = true;
+			if ((coord = coordToIndex(x + 1, y)) < l && next[coord].y === y) next[coord].isExplored = true;
+			if ((coord = coordToIndex(x, y)) < l) next[coord].isExplored = true;
+			if ((coord = coordToIndex(x, y - 1)) < l && coord > 0) next[coord].isExplored = true;
+			if ((coord = coordToIndex(x, y + 1)) < l) next[coord].isExplored = true;
+
+			return next;
+		});
+	};
 
 	return (
 		<div className={css.wrap}>
@@ -221,21 +378,33 @@ export default function World () {
 								<>
 									<strong>Untamed Hinterland</strong> ({x}, {y})<br/>
 									<strong>Difficulty:</strong> {difficulty}<br/>
-									<strong>Biome:</strong> {biome}<br/>
-									<strong>Resource:</strong> {resource}<br/>
-									<strong>Mob:</strong> {mob}
+									{(!appearance.fogOfWar || cell.isExplored) && (
+										<>
+											<strong>Biome:</strong> {biome}<br/>
+											<strong>Resource:</strong> {resource}<br/>
+											<strong>Mob:</strong> {mob}
+										</>
+									)}
 								</>
 							)}>
-								<span className={css.cell}>
-									{RESOURCE[resource].icon ? (
-										<>{RESOURCE[resource].icon}<small>{BIOME[biome].icon}{MOB[mob].icon}</small></>
-									) : (
-										<>{BIOME[biome].icon}<small>{MOB[mob].icon}</small></>
-									)}
-									<span>{Array.from(
-										{length:difficulty},
-										(_, i) => <i key={i} />
-									)}</span>
+								<span className={css.cell} onClick={onCellClick(cell)}>
+									<span className={css.icons}>
+										{appearance.fogOfWar && !cell.isExplored ? (
+											<small>☁️</small>
+										) : (
+											<>
+												{appearance.resourceIcons && RESOURCE[resource].icon && <small>{RESOURCE[resource].icon}</small>}
+												{appearance.biomeIcons && <small>{BIOME[biome].icon}</small>}
+												{appearance.mobIcons && <small>{MOB[mob].icon}</small>}
+											</>
+										)}
+									</span>
+									<span className={css.difficulty}>
+										{Array.from(
+											{length:difficulty},
+											(_, i) => <i key={i} />
+										)}
+									</span>
 								</span>
 							</Tooltip>
 						);
@@ -253,6 +422,29 @@ export default function World () {
 					defaultValue={mapSize}
 					onInput={onMapSizeChange}
 				/>
+				<details>
+					<summary>Appearance</summary>
+					<Input
+						label="Biome Icons" type="checkbox"
+						defaultChecked={appearance.biomeIcons}
+						onChange={onCheckboxChange('biomeIcons')}
+					/>
+					<Input
+						label="Resource Icons" type="checkbox"
+						defaultChecked={appearance.resourceIcons}
+						onChange={onCheckboxChange('resourceIcons')}
+					/>
+					<Input
+						label="Mob Icons" type="checkbox"
+						defaultChecked={appearance.mobIcons}
+						onChange={onCheckboxChange('mobIcons')}
+					/>
+					<Input
+						label="Fog of War" type="checkbox"
+						defaultChecked={appearance.fogOfWar}
+						onChange={onCheckboxChange('fogOfWar')}
+					/>
+				</details>
 				<details>
 					<summary>Biome Spawns</summary>
 					{Object.keys(BIOME).map(k => k.toLowerCase()).map(key => (
@@ -274,6 +466,10 @@ export default function World () {
 							defaultValue={spawnRates.resources[key]}
 						/>
 					))}
+				</details>
+				<details>
+					<summary>Spawn Rates JSON</summary>
+					<pre onClick={e => window.getSelection().selectAllChildren(e.target)}>{JSON.stringify(spawnRates, null, 2)}</pre>
 				</details>
 			</aside>
 		</div>

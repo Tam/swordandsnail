@@ -11,6 +11,15 @@
 		display: block;
 		margin-bottom: size(4);
 	}
+
+	&.isCheckbox {
+		display: flex;
+		justify-content: space-between;
+
+		& + & {
+			margin-top: size(-15);
+		}
+	}
 }
 
 .input {
@@ -46,6 +55,7 @@
 		@extend .input;
 		padding-left: size(20);
 		text-indent: 0;
+		accent-color: $text-color;
 	}
 
 	&::after {
@@ -61,4 +71,8 @@
 
 		pointer-events: none;
 	}
+}
+
+.checkbox {
+	accent-color: $text-color;
 }
