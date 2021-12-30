@@ -64,10 +64,9 @@ export default class Renderer {
 		this._ctx.clearRect(pos.x, pos.y, this._cellWidth, this._cellHeight);
 	}
 
-	drawChar = (c) => {
-		if (!c) return;
-		const { char, position } = c;
-		const pos = this.cellCentreToPos(position.x, position.y);
+	drawChar = (char, x, y) => {
+		if (!char) return;
+		const pos = this.cellCentreToPos(x, y);
 
 		this._ctx.fillStyle = this._textColour;
 		this._ctx.fillText(
