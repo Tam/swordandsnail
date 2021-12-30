@@ -1,7 +1,68 @@
-import randomFromArray from '../../../util/random';
+import randomFromArray, { getRandomInt } from '../../../util/random';
 
 export default function forest (renderer, width, height) {
 	const terrain = [];
+
+	function getLineOfCells (ax, ay, bx, by) {
+		const cells = [];
+
+		let x = ax,
+			y = ay;
+
+		const dx = bx - ax
+			, dy = by - ay;
+
+		let step = Math.sign(dx),
+			gradientStep = Math.sign(dy),
+			longest = Math.abs(dx),
+			shortest = Math.abs(dy);
+
+		const inverted = longest < shortest;
+
+		if (inverted) {
+			step = Math.sign(dy);
+			gradientStep = Math.sign(dx);
+			longest = Math.abs(dy);
+			shortest = Math.abs(dx);
+		}
+
+		let gradientAccumulation = (longest / 2)|0;
+
+		for (let i = 0; i < longest; i++) {
+			cells.push(x + width * y);
+
+			if (inverted) y += step;
+			else x += step;
+
+			gradientAccumulation += shortest;
+
+			if (gradientAccumulation >= longest) {
+				if (inverted) x += gradientStep;
+				else y += gradientStep;
+
+				gradientAccumulation -= longest;
+			}
+		}
+
+		return cells;
+	}
+
+	function drawCircleOfCells (x, y, radius = 1, cellType = 0, avoidEdges = false) {
+		// const r2 = (radius + 0.5) * (radius + 0.5);
+		const r2 = radius * radius;
+
+		for (let ny = -radius; ny <= radius; ny++) {
+			for (let nx = -radius; nx <= radius; nx++) {
+				if ((nx * nx + ny * ny) <= r2) {
+					const cellX = x + nx
+						, cellY = y + ny;
+
+					if (cellInRange(cellX, cellY, avoidEdges))
+						terrain[cellX + width * cellY] = cellType;
+				}
+			}
+		}
+	}
 
 	// Randomly fill map with solid blocks
 	for (let y = 0, l = height; y < l; y++) {
@@ -14,7 +75,15 @@ export default function forest (renderer, width, height) {
 		}
 	}
 
-	const cellInRange = (x, y) => {
+	const cellInRange = (x, y, avoidEdges = false) => {
+		if (avoidEdges) {
+			if (x < 2 || x >= width - 2) return false;
+			if (y < 2 || y >= height - 2) return false;
+		}
+
+		if (x < 0 || x >= width) return false;
+		if (y < 0 || y >= height) return false;
+
 		const i = (x + width * y);
 		return i >= 0 && i < terrain.length;
 	};
@@ -39,6 +108,29 @@ export default function forest (renderer, width, height) {
 			}
 		}
 	}
+
+	// Add entrances
+	const quarterWidth = width / 4
+		, quarterHeight = height / 4;
+
+	const entranceCells = {
+		n: getRandomInt(quarterWidth, width - quarterWidth),
+		e: getRandomInt(quarterHeight, height - quarterHeight),
+		s: getRandomInt(quarterWidth, width - quarterWidth),
+		w: getRandomInt(quarterHeight, height - quarterHeight),
+	};
+
+	const entranceIndexes = [
+		entranceCells.n + width * 1,
+		1 + width * entranceCells.e,
+		entranceCells.s + width * (height - 2),
+		(width - 2) + width * entranceCells.w,
+	];
+
+	drawCircleOfCells(entranceCells.n, 1, 4); // North
+	drawCircleOfCells(1, entranceCells.e, 4); // East
+	drawCircleOfCells(entranceCells.s, height - 2, 4); // South
+	drawCircleOfCells(width - 2, entranceCells.w, 4); // West
 
 	function getRegionCells (startingIndex, maxCellsInRegion, parentCellsVisited) {
 		const regionCells = [];
@@ -97,8 +189,8 @@ export default function forest (renderer, width, height) {
 		, clearings = [];
 
 	holes.forEach(region => {
-		// Flood-fill small holes
-		if (region.length <= 50) {
+		// Flood-fill small holes (excluding the entrances)
+		if (region.length <= 50 && region.every(i => !entranceIndexes.includes(i))) {
 			region.forEach(i => {
 				terrain[i] = 1;
 			});
@@ -148,66 +240,6 @@ export default function forest (renderer, width, height) {
 	clearings[0].isConnectedToMainRegion = true;
 
 	// Connect regions
-	function getLineOfCells (ax, ay, bx, by) {
-		const cells = [];
-
-		let x = ax,
-			y = ay;
-
-		const dx = bx - ax
-			, dy = by - ay;
-
-		let step = Math.sign(dx),
-			gradientStep = Math.sign(dy),
-			longest = Math.abs(dx),
-			shortest = Math.abs(dy);
-
-		const inverted = longest < shortest;
-
-		if (inverted) {
-			step = Math.sign(dy);
-			gradientStep = Math.sign(dx);
-			longest = Math.abs(dy);
-			shortest = Math.abs(dx);
-		}
-
-		let gradientAccumulation = (longest / 2)|0;
-
-		for (let i = 0; i < longest; i++) {
-			cells.push(x + width * y);
-
-			if (inverted) y += step;
-			else x += step;
-
-			gradientAccumulation += shortest;
-
-			if (gradientAccumulation >= longest) {
-				if (inverted) x += gradientStep;
-				else y += gradientStep;
-
-				gradientAccumulation -= longest;
-			}
-		}
-
-		return cells;
-	}
-
-	function drawCircleOfCells (x, y, radius = 1, cellType = 0) {
-		const r2 = radius * radius;
-
-		for (let ny = -radius; ny <= radius; ny++) {
-			for (let nx = -radius; nx <= radius; nx++) {
-				if (nx * nx + ny * ny <= r2) {
-					const cellX = x + nx
-						, cellY = y + ny;
-
-					if (cellInRange(cellX, cellY))
-						terrain[cellX + width * cellY] = cellType;
-				}
-			}
-		}
-	}
-
 	function connectRegions (regionA, regionB, cellA, cellB) {
 		if (regionA.isConnectedToMainRegion) regionB.setIsConnectedToMainRegion();
 		else if (regionB.isConnectedToMainRegion) regionA.setIsConnectedToMainRegion();
@@ -224,7 +256,9 @@ export default function forest (renderer, width, height) {
 			drawCircleOfCells(
 				i % width,
 				(i / width)|0,
-				3
+				3,
+				0,
+				true
 			);
 		});
 	}
@@ -302,10 +336,15 @@ export default function forest (renderer, width, height) {
 
 	connectClosestRegions(clearings);
 
+	// drawCircleOfCells(entranceCells.n, 0, 4, 2); // North
+	// drawCircleOfCells(0, entranceCells.e, 4, 2); // East
+	// drawCircleOfCells(entranceCells.s, height - 1, 4, 2); // South
+	// drawCircleOfCells(width - 1, entranceCells.w, 4, 2); // West
+
 	// Render the cells
 	renderer.clearCanvas();
 	terrain.forEach((full, i) => full && renderer.drawChar(
-		randomFromArray(['🌲','🌴','🌳']),
+		full === 2 ? '🔴' : randomFromArray(['🌲','🌴','🌳']),
 		i % width,
 		(i / width)|0
 	));
@@ -313,17 +352,17 @@ export default function forest (renderer, width, height) {
 	// Populate room
 	// TODO: Move this into a separate thing,
 	//  this function should just return cell locations
-	const validCells = getRegionCells(clearings[0].cells[0]);
-
-	validCells.forEach(i => {
-		if (Math.random() > 0.99) {
-			renderer.drawChar(
-				'🧝‍♂️',
-				i % width,
-				(i / width)|0
-			);
-		}
-	});
+	// const validCells = getRegionCells(clearings[0].cells[0]);
+	//
+	// validCells.forEach(i => {
+	// 	if (Math.random() > 0.99) {
+	// 		renderer.drawChar(
+	// 			'🧝‍♂️',
+	// 			i % width,
+	// 			(i / width)|0
+	// 		);
+	// 	}
+	// });
 
 	// TODO: Gaps for entrances / exits
 	// TODO: Blend edges into neighbouring region biomes
