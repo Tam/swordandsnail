@@ -37,21 +37,21 @@ export default class Renderer {
 		this._canvas.height = cellHeight * height;
 
 		this._ctx.font = `normal ${fontSize}px ${window.getComputedStyle(document.body).getPropertyValue('font-family').split(',')[0]}`;
-		this._ctx.textAlign = "center";
-		this._ctx.textBaseline = "middle";
+		this._ctx.textAlign = 'center';
+		this._ctx.textBaseline = 'middle';
 	}
 
 	cellToPos = (x, y) => ({
-		x: x * this._cellWidth + this._cellWidth / 2,
-		y: y * this._cellHeight + this._cellHeight / 2,
+		x: x * this._cellWidth,
+		y: y * this._cellHeight,
 	});
 
-	cellToPosCorner = (x, y) => {
+	cellCentreToPos = (x, y) => {
 		const pos = this.cellToPos(x, y);
 
 		return {
-			x: pos.x - this._cellWidth / 2,
-			y: pos.y - this._cellHeight / 2,
+			x: pos.x + this._cellWidth / 2,
+			y: pos.y + this._cellHeight / 2,
 		};
 	};
 
@@ -60,14 +60,14 @@ export default class Renderer {
 	}
 
 	clearCell = (x, y) => {
-		const pos = this.cellToPosCorner(x, y);
+		const pos = this.cellToPos(x, y);
 		this._ctx.clearRect(pos.x, pos.y, this._cellWidth, this._cellHeight);
 	}
 
 	drawChar = (c) => {
 		if (!c) return;
 		const { char, position } = c;
-		const pos = this.cellToPos(position.x, position.y);
+		const pos = this.cellCentreToPos(position.x, position.y);
 
 		this._ctx.fillStyle = this._textColour;
 		this._ctx.fillText(
@@ -75,6 +75,18 @@ export default class Renderer {
 			pos.x,
 			pos.y
 		);
+	}
+
+	drawDebugLine = (ax, ay, bx, by) => {
+		const a = this.cellCentreToPos(ax, ay)
+			, b = this.cellCentreToPos(bx, by);
+
+		this._ctx.beginPath();
+		this._ctx.moveTo(a.x, a.y);
+		this._ctx.lineTo(b.x, b.y);
+		this._ctx.lineWidth = this._cellWidth / 5;
+		this._ctx.strokeStyle = 'magenta';
+		this._ctx.stroke();
 	}
 
 }
