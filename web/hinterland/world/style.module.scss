@@ -1,9 +1,17 @@
 @import "../../styles/variables";
 
 .wrap {
+	position: relative;
 	display: grid;
+	align-items: start;
 	grid-template-columns: 1fr 300px;
 	grid-column-gap: #{size($spacer)};
+
+	> div,
+	> aside {
+		position: sticky;
+		top: size($spacer * 2);
+	}
 
 	> div:first-child {
 		display: flex;
